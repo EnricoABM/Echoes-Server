@@ -15,6 +15,9 @@ import com.n0hana.echoes_server.dto.RegisterRequestDTO;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.TokenService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -59,6 +62,12 @@ public class AuthController {
 
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/ott/sent")
+    public String getMethodName(@RequestParam String param) {
+        return "sent";
+    }
+    
     
     
 }
