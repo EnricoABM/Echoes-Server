@@ -8,22 +8,22 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.n0hana.echoes_server.model.UserRole;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     
-    private final SecurityFilter securityFilter;
+    private final JwtSecurityFilter securityFilter;
 
-    public SecurityConfig(SecurityFilter securityFilter) {
-        this.securityFilter = securityFilter;
-    }
+    private final LogoutService logoutService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -36,6 +36,13 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/hello").hasRole("ADMIN")
                     .anyRequest().authenticated())
             .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+            .logout((logout) -> logout
+                .logoutUrl("/api/auth/logout")
+                .addLogoutHandler(logoutService)
+                .logoutSuccessHandler(
+                    (request, response, authentication) -> 
+                    SecurityContextHolder.clearContext())   
+                )
             .build();
     }
 

@@ -16,7 +16,10 @@ import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.TokenService;
 
+import lombok.RequiredArgsConstructor;
 
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -26,26 +29,14 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthController(
-        AuthenticationManager authenticationManager,
-        UserRepository userRepository,
-        PasswordEncoder passwordEncoder,
-        TokenService tokenService
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenService = tokenService;
-    }
-
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO dto) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
-        var token = tokenService.generateToken((User) auth.getPrincipal());
+        String jwtToken = tokenService.generateToken((User) auth.getPrincipal());
 
-        return ResponseEntity.ok(new AuthResponseDTO(token));
+        return ResponseEntity.ok(new AuthResponseDTO(jwtToken));
     }
 
     @PostMapping("/register")
