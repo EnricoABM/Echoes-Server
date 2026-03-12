@@ -1,0 +1,15 @@
+package com.n0hana.echoes_server.service;
+
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
+
+import com.n0hana.echoes_server.dto.TwoFactorDto;
+
+@Primary
+@Service
+public class LoggerNotifier implements TwoFactorNotifier {
+  @Override
+  public void send(TwoFactorDto dto) {
+    System.out.println(dto.dto().email() + " : " + dto.code());
+  }
+}
