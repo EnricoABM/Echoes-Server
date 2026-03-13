@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 
-@Primary
 @Service
 public class LoggerNotifier implements TwoFactorNotifier {
   @Override
