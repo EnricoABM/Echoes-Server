@@ -9,6 +9,6 @@ import com.n0hana.echoes_server.dto.TwoFactorDto;
 public class LoggerNotifier implements TwoFactorNotifier {
   @Override
   public void send(TwoFactorDto dto) {
-    System.out.println(dto.dto().email() + " : " + dto.code());
+    System.out.println(dto.email() + " : " + dto.code());
   }
 }

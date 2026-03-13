@@ -18,6 +18,7 @@ import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
+import com.n0hana.echoes_server.repository.PendingRegisterRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.TokenService;
 import com.n0hana.echoes_server.service.TwoFactorNotifier;
@@ -36,6 +37,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final InMemoryTwoFactorRepository twoFactorRepository;
+    private final PendingRegisterRepository registerRepository;
     private final PasswordEncoder passwordEncoder;
     private final TwoFactorService twoFactorService;
     private final TwoFactorNotifier notifier;
@@ -44,6 +46,7 @@ public class AuthController {
         AuthenticationManager authenticationManager,
         UserRepository userRepository,
         InMemoryTwoFactorRepository twoFactorRepository,
+        PendingRegisterRepository registerRepository,
         PasswordEncoder passwordEncoder,
         TokenService tokenService,
         TwoFactorService twoFactorService,
@@ -52,6 +55,7 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.twoFactorRepository = twoFactorRepository;
+        this.registerRepository = registerRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
         this.twoFactorService = twoFactorService;
@@ -76,10 +80,11 @@ public class AuthController {
 
         String code = twoFactorService.generateCode();
         TwoFactorDto token = new TwoFactorDto(
+            dto.email(),
             code,
-            Instant.now().plusSeconds(300),
-            dto
+            Instant.now().plusSeconds(300)
             );
+        registerRepository.save(dto);
 
         twoFactorRepository.save(token);
 
@@ -92,7 +97,7 @@ public class AuthController {
     public ResponseEntity<?> verify(@RequestBody VerifyDTO dto) {
         var tokenExists = twoFactorRepository.findByEmail(dto.email());
         if (tokenExists.isEmpty())
-          return ResponseEntity.status(404).body("Code not exists");
+            return ResponseEntity.status(404).body("Code not exists");
 
         var token = tokenExists.get();
         if (token.expiresAt().isBefore(Instant.now()))
@@ -100,14 +105,19 @@ public class AuthController {
 
         if (!token.code().equals(dto.code()))
             return ResponseEntity.status(401).body("Invalid code");
+        
+        var registerDto = registerRepository.find(dto.email());
+        if (registerDto == null)
+            return ResponseEntity.status(404).body("Code not exists");
 
 
-        String encryptedPassword = passwordEncoder.encode(token.dto().password());
-        User user = new User(token.dto().name(), dto.email(), encryptedPassword, token.dto().role());
+        String encryptedPassword = passwordEncoder.encode(registerDto.password());
+        User user = new User(registerDto.name(), dto.email(), encryptedPassword, registerDto.role());
     
         userRepository.save(user);
 
         twoFactorRepository.deleteByEmail(dto.email());
+        registerRepository.delete(registerDto.email());
 
         return ResponseEntity.ok().build();
     }

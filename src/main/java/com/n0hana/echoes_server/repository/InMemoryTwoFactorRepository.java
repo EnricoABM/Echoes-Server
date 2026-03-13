@@ -15,7 +15,7 @@ public class InMemoryTwoFactorRepository {
     private final Map<String, TwoFactorDto> storage = new ConcurrentHashMap<>();
 
     public TwoFactorDto save(TwoFactorDto token) {
-        storage.put(token.dto().email(), token);
+        storage.put(token.email(), token);
         return token;
     }
 
