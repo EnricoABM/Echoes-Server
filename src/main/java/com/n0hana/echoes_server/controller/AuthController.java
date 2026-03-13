@@ -18,6 +18,7 @@ import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
+import com.n0hana.echoes_server.repository.PendingAuthRepository;
 import com.n0hana.echoes_server.repository.PendingRegisterRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.TokenService;
@@ -38,6 +39,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final InMemoryTwoFactorRepository twoFactorRepository;
     private final PendingRegisterRepository registerRepository;
+    private final PendingAuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final TwoFactorService twoFactorService;
     private final TwoFactorNotifier notifier;
@@ -47,6 +49,7 @@ public class AuthController {
         UserRepository userRepository,
         InMemoryTwoFactorRepository twoFactorRepository,
         PendingRegisterRepository registerRepository,
+        PendingAuthRepository authRepository,
         PasswordEncoder passwordEncoder,
         TokenService tokenService,
         TwoFactorService twoFactorService,
@@ -56,6 +59,7 @@ public class AuthController {
         this.userRepository = userRepository;
         this.twoFactorRepository = twoFactorRepository;
         this.registerRepository = registerRepository;
+        this.authRepository = authRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
         this.twoFactorService = twoFactorService;
@@ -63,13 +67,52 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO dto) {
+    public ResponseEntity<Void> login(@RequestBody AuthRequestDTO dto) {
+        var exists = userRepository.findUserByEmail(dto.email());
+        if (exists.isEmpty())
+            return ResponseEntity.badRequest().build();
+
         var usernamePassword = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
-        var auth = this.authenticationManager.authenticate(usernamePassword);
+        this.authenticationManager.authenticate(usernamePassword);
 
-        var token = tokenService.generateToken((User) auth.getPrincipal());
+        String code = twoFactorService.generateCode();
+        TwoFactorDto token = new TwoFactorDto(
+            dto.email(),
+            code,
+            Instant.now().plusSeconds(300)
+        );
 
-        return ResponseEntity.ok(new AuthResponseDTO(token));
+        authRepository.save(dto);
+        twoFactorRepository.save(token);
+
+        notifier.send(token);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/login/2fa")
+    public ResponseEntity<?> loginMFA(@RequestBody VerifyDTO dto) {
+        var tokenExists = twoFactorRepository.findByEmail(dto.email());
+        if (tokenExists.isEmpty())
+            return ResponseEntity.status(404).body("Code not exists");
+        var token = tokenExists.get();
+        if (token.expiresAt().isBefore(Instant.now()))
+            return ResponseEntity.status(401).body("Code expired");
+
+        if (!token.code().equals(dto.code()))
+            return ResponseEntity.status(401).body("Invalid code");
+        var auth = authRepository.find(dto.email());
+        if (auth == null)
+            return ResponseEntity.status(404).body("Code not exists");
+
+        var usernamePassword = new UsernamePasswordAuthenticationToken(auth.email(), auth.password());
+        var authToken = this.authenticationManager.authenticate(usernamePassword);
+
+        var jwt = tokenService.generateToken((User) authToken.getPrincipal());
+
+        authRepository.delete(dto.email());
+
+        return ResponseEntity.ok(new AuthResponseDTO(jwt));
     }
 
     @PostMapping("/register")
@@ -94,7 +137,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/2fa")
-    public ResponseEntity<?> verify(@RequestBody VerifyDTO dto) {
+    public ResponseEntity<?> registerMFA(@RequestBody VerifyDTO dto) {
         var tokenExists = twoFactorRepository.findByEmail(dto.email());
         if (tokenExists.isEmpty())
             return ResponseEntity.status(404).body("Code not exists");
