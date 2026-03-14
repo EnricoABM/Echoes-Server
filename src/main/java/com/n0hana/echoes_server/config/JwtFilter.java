@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.n0hana.echoes_server.repository.UserRepository;
-import com.n0hana.echoes_server.service.TokenService;
+import com.n0hana.echoes_server.service.auth.TokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

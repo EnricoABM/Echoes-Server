@@ -1,4 +1,4 @@
-package com.n0hana.echoes_server.service;
+package com.n0hana.echoes_server.service.auth;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

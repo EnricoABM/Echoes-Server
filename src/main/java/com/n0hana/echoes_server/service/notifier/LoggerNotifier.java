@@ -1,4 +1,4 @@
-package com.n0hana.echoes_server.service;
+package com.n0hana.echoes_server.service.notifier;
 
 import org.springframework.stereotype.Service;
 
