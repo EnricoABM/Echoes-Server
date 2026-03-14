@@ -1,6 +1,5 @@
 package com.n0hana.echoes_server.service;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.n0hana.echoes_server.dto.TwoFactorDto;

@@ -17,13 +17,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class SecurityFilter extends OncePerRequestFilter {
+public class JwtFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
 
     private final UserRepository userRepository;
 
-    public SecurityFilter(
+    public JwtFilter(
         TokenService tokenService,
         UserRepository userRepository
     ) {

@@ -21,17 +21,17 @@ import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.repository.PendingAuthRepository;
 import com.n0hana.echoes_server.repository.PendingRegisterRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
+import com.n0hana.echoes_server.service.LoggerNotifier;
 import com.n0hana.echoes_server.service.TokenService;
-import com.n0hana.echoes_server.service.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.TwoFactorService;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import lombok.RequiredArgsConstructor;
 
 
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final TokenService tokenService;
@@ -42,29 +42,8 @@ public class AuthController {
     private final PendingAuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final TwoFactorService twoFactorService;
-    private final TwoFactorNotifier notifier;
+    private final LoggerNotifier notifier;
 
-    public AuthController(
-        AuthenticationManager authenticationManager,
-        UserRepository userRepository,
-        InMemoryTwoFactorRepository twoFactorRepository,
-        PendingRegisterRepository registerRepository,
-        PendingAuthRepository authRepository,
-        PasswordEncoder passwordEncoder,
-        TokenService tokenService,
-        TwoFactorService twoFactorService,
-        TwoFactorNotifier notifier
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.twoFactorRepository = twoFactorRepository;
-        this.registerRepository = registerRepository;
-        this.authRepository = authRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenService = tokenService;
-        this.twoFactorService = twoFactorService;
-        this.notifier = notifier;
-    }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody AuthRequestDTO dto) {
@@ -163,13 +142,7 @@ public class AuthController {
         registerRepository.delete(registerDto.email());
 
         return ResponseEntity.ok().build();
-    }
+    }    
 
-    @GetMapping("/ott/sent")
-    public String getMethodName(@RequestParam String param) {
-        return "sent";
-    }
-    
-    
     
 }
