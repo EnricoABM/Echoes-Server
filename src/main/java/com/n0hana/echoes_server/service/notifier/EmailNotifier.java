@@ -20,8 +20,6 @@ public class EmailNotifier implements TwoFactorNotifier {
 
     @Value("${MAILTRAP_TOKEN}")
     private String TOKEN;
-    @Value("${MAILTRAP_EMAIL}")
-    private String EMAIL;
 
     @Override
     public void send(TwoFactorDto dto) {
@@ -35,7 +33,7 @@ public class EmailNotifier implements TwoFactorNotifier {
         final MailtrapClient client = MailtrapClientFactory.createMailtrapClient(config);
         final MailtrapMail mail = MailtrapMail.builder()
             .from(new Address("hello@demomailtrap.co", "Mailtrap Test"))
-            .to(List.of(new Address(EMAIL)))
+            .to(List.of(new Address(dto.email())))
             .subject("Seu código de verificação")
             .text("Seu login é: " + dto.code())
             .build();
