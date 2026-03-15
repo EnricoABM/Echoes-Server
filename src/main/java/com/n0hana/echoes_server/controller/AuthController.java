@@ -2,9 +2,11 @@ package com.n0hana.echoes_server.controller;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.n0hana.echoes_server.dto.AuthRequestDTO;
 import com.n0hana.echoes_server.dto.AuthResponseDTO;
+import com.n0hana.echoes_server.dto.LoginFailedResponseDTO;
 import com.n0hana.echoes_server.dto.RegisterRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
@@ -28,6 +31,7 @@ import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
 import com.n0hana.echoes_server.service.auth.TwoFactorService;
 import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
+import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,21 +51,48 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final TwoFactorService twoFactorService;
     private final LoggerNotifier notifier;
-
-
-
+    private final LoginAttemptService loginAttemptService;
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody AuthRequestDTO dto) {
+    public ResponseEntity<?> login(@RequestBody AuthRequestDTO dto) {
 
         // Verifica se o Usuário existe
         var exists = userRepository.findUserByEmail(dto.email());
         if (exists.isEmpty())
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("User not found");
+
+        // Retorna o usuário
+        User user = exists.get();
+
+        // Verifica se a conta está bloqueada ou não
+        if (!user.isAccountNonLocked()) {
+            return ResponseEntity.status(423).body("Account Locked");
+        }
 
         // Autenticação primária
         var usernamePassword = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
-        this.authenticationManager.authenticate(usernamePassword);
+        
+        try {
+            // Tenta autenticar o usuário com email e senha
+            this.authenticationManager.authenticate(usernamePassword);
+            loginAttemptService.loginSucceeded(dto.email());
+
+        } catch (BadCredentialsException e) {
+            // Caso as credenciais sejam invalidas, adiciona um contador na quantidade máxima
+            int attempts = loginAttemptService.loginFailed(dto.email());
+
+            // Calcula a quantidade restante
+            int remainingAttempts = loginAttemptService.MAX_ATTEMPTS - attempts;
+
+            // Resposta da autenticação inválida, informa quantidade restante
+            return ResponseEntity.status(401).body(
+                new LoginFailedResponseDTO(
+                    "Invalid credentials",
+                    attempts,
+                    Math.max(remainingAttempts, 0)
+                )
+            );
+        }
 
         // Criação do Código de 2FA
         String code = twoFactorService.generateCode();
@@ -206,16 +237,19 @@ public class AuthController {
 
     @GetMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String header) {
+        
+        // Verifica se o usuário existe
         String token = header.replace("Bearer ", "");
 
-        String email = tokenService.validadeToken(token);
+        String uuid = tokenService.validadeToken(token);
 
-        Optional<User> opt = userRepository.findUserByEmail(email);
+        Optional<User> opt = userRepository.findById(UUID.fromString(uuid));
     
         if (opt.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
+        // Revoga todos os tokens do usuário
         User user = opt.get();
 
         tokenService.revokeAll(user);

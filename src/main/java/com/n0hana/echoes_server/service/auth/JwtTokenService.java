@@ -33,7 +33,7 @@ public class JwtTokenService {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
             .withIssuer("auth-api")
-            .withSubject(user.getEmail())
+            .withSubject(user.getId().toString())
             .withExpiresAt(genExpirationDate())
             .sign(algorithm);
 
@@ -53,6 +53,7 @@ public class JwtTokenService {
                 .build()
                 .verify(token)
                 .getSubject();    
+                
         } catch (JWTVerificationException e) {
             System.err.println("Erro na verificação: " + e.getMessage());
             return "";

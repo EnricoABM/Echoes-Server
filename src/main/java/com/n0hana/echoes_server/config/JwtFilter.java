@@ -2,6 +2,7 @@ package com.n0hana.echoes_server.config;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,8 +36,8 @@ public class JwtFilter extends OncePerRequestFilter {
         Optional<Token> opt = tokenService.findByToken(token);
 
         if (opt.isPresent() && !opt.get().isRevoked()) {
-            var email = tokenService.validadeToken(token);
-            var userExists = userRepository.findUserByEmail(email);
+            var uuid = tokenService.validadeToken(token);
+            var userExists = userRepository.findById(UUID.fromString(uuid));
             if (userExists.isEmpty())
               return;
 
