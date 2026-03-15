@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Perfil</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: "#2e4c9b"
+        }
+      }
+    }
+  }
+  </script>
+
+</head>
+
+<body class="bg-gray-100 h-screen">
+
+<div class="flex h-full">
+
+
+<aside class="w-64 bg-primary text-white flex flex-col">
+
+<div class="p-6 text-xl font-bold border-b border-blue-800">
+  Dashboard
+</div>
+
+<nav class="flex-1 p-4 space-y-2">
+
+  <a href="/dashboard"
+     class="block px-4 py-2 rounded hover:bg-blue-800 transition">
+    Dashboard
+  </a>
+
+  <a href="/dashboard/profile"
+     class="block px-4 py-2 rounded bg-blue-800">
+    Perfil
+  </a>
+
+</nav>
+
+<div class="p-4 border-t border-blue-800">
+  <button
+    id="logout-btn"
+    class="w-full bg-red-500 hover:bg-red-600 py-2 rounded transition">
+    Sair
+  </button>
+</div>
+```
+
+  </aside>
+
+
+  <main class="flex-1 p-10">
+
+<h1 class="text-3xl font-bold text-gray-800">
+  Meu Perfil
+</h1>
+
+<div class="mt-8 bg-white shadow rounded-lg p-6 w-full max-w-lg">
+
+  <div class="mb-4">
+    <p class="text-sm text-gray-500">Nome</p>
+    <p class="text-lg font-semibold text-gray-800"
+       th:text="${user.name}">
+      Nome do Usuário
+    </p>
+  </div>
+
+  <div>
+    <p class="text-sm text-gray-500">Email</p>
+    <p class="text-lg font-semibold text-gray-800"
+       th:text="${user.email}">
+      email@exemplo.com
+    </p>
+  </div>
+
+</div>
+
+</main>
+
+</div>
+
+<script th:src="@{/js/dashboard.js}"></script>
+
+</body>
+</html>
