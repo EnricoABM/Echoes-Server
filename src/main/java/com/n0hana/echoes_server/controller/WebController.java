@@ -13,6 +13,11 @@ public class WebController {
         return "home";
     }
 
+    @GetMapping("/register")
+    public String register(Model model) {
+        return "register";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(@CookieValue(value = "access_token", required = false) String token) {
 
