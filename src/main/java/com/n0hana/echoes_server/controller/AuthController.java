@@ -122,11 +122,6 @@ public class AuthController {
 
         String accept = request.getHeader("Accept");
 
-        // CLIENTE REST
-        if (accept != null && accept.contains("application/json")) {
-            return ResponseEntity.ok(new AuthResponseDTO(jwt));
-        }
-
         // BROWSER → COOKIE
         Cookie cookie = new Cookie("access_token", jwt);
         cookie.setHttpOnly(true);
@@ -136,7 +131,7 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new AuthResponseDTO(jwt));
     }
 
     @PostMapping("/register")
@@ -219,22 +214,56 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }    
 
+
     @GetMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String header) {
-        String token = header.replace("Bearer ", "");
+    public ResponseEntity<Void> logout(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    @RequestHeader(value = "Authorization", required = false) String header) {
+        String token = null;
+
+        // 1️⃣ API → Authorization header
+        if (header != null && header.startsWith("Bearer ")) {
+            token = header.replace("Bearer ", "");
+        }
+
+        // 2️⃣ Browser → Cookie
+        if (token == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("access_token")) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token == null) {
+            return ResponseEntity.badRequest().build();
+        }
 
         String email = tokenService.validadeToken(token);
 
         Optional<User> opt = userRepository.findUserByEmail(email);
-    
+
         if (opt.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
         User user = opt.get();
 
+        // revoga tokens ativos
         tokenService.revokeAll(user);
+
+        // remove cookie do navegador
+        Cookie cookie = new Cookie("access_token", "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // HTTPS em produção
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
 
         return ResponseEntity.ok().build();
     }
+
 }

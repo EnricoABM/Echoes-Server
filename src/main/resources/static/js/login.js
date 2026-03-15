@@ -52,7 +52,7 @@
     try {
       evt.preventDefault();
       const code = document.getElementById("code").value;
-      const res = await verifyCode(email, code);
+      const res = await verifyCode(userEmail, code);
       if (res)
         window.location.href = '/dashboard';
       else
