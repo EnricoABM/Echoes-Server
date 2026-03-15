@@ -34,10 +34,6 @@ import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
 import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
-
 
 @RestController
 @RequestMapping("/api/auth")
