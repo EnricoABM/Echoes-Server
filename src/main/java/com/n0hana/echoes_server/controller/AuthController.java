@@ -1,13 +1,18 @@
 package com.n0hana.echoes_server.controller;
 
+import com.n0hana.echoes_server.repository.JwtTokenRepository;
 import java.time.Instant;
+import java.util.Optional;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +27,7 @@ import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.repository.PendingAuthRepository;
 import com.n0hana.echoes_server.repository.PendingRegisterRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
-import com.n0hana.echoes_server.service.auth.TokenService;
+import com.n0hana.echoes_server.service.auth.JwtTokenService;
 import com.n0hana.echoes_server.service.auth.TwoFactorService;
 import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
 
@@ -35,7 +40,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final TokenService tokenService;
+    private final JwtTokenService tokenService;
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final InMemoryTwoFactorRepository twoFactorRepository;
@@ -44,6 +49,8 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final TwoFactorService twoFactorService;
     private final LoggerNotifier notifier;
+
+
 
 
     @PostMapping("/login")
@@ -199,5 +206,22 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }    
 
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String header) {
+        String token = header.replace("Bearer ", "");
+
+        String email = tokenService.validadeToken(token);
+
+        Optional<User> opt = userRepository.findUserByEmail(email);
     
+        if (opt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = opt.get();
+
+        tokenService.revokeAll(user);
+
+        return ResponseEntity.ok().build();
+    }
 }
