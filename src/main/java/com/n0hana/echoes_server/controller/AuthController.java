@@ -1,10 +1,8 @@
 package com.n0hana.echoes_server.controller;
 
-import com.n0hana.echoes_server.repository.JwtTokenRepository;
 import java.time.Instant;
 import java.util.Optional;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
