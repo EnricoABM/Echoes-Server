@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#2e4c9b"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+  <div class="bg-white p-8 rounded-lg shadow-md w-96">
+
+  <h1 class="text-2xl font-bold text-center mb-6" style="color:#2e4c9b;">
+  Login
+  </h1>
+
+  <!-- LOGIN FORM -->
+  <div id="login-form">
+
+  <input id="email"
+  class="w-full border p-2 rounded mb-3"
+  placeholder="Email"
+  type="email">
+
+  <input id="password"
+  class="w-full border p-2 rounded mb-4"
+  placeholder="Senha"
+  type="password">
+
+  <button onclick="login()"
+  class="bg-primary w-full text-white p-2 rounded">
+  Entrar
+  </button>
+
+  </div>
+
+  <!-- 2FA FORM -->
+  <div id="mfa-form" class="hidden">
+
+  <p class="text-sm text-gray-600 mb-3">
+  Digite o código enviado para seu email
+  </p>
+
+  <input id="code"
+  class="w-full border p-2 rounded mb-4"
+  placeholder="Código de verificação"
+  type="text">
+
+  <button onclick="verifyCode()"
+  class="w-full text-white p-2 rounded"
+  style="background-color:#2e4c9b;">
+  Verificar
+  </button>
+
+  </div>
+
+  </div>
+
+  <script>
+
+  let userEmail = null;
+
+  async function login() {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/api/auth/login", {
+  method: "POST",
+  headers: {
+  "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ email, password })
+  });
+
+  if (res.ok) {
+
+  userEmail = email;
+
+  document.getElementById("login-form").classList.add("hidden");
+  document.getElementById("mfa-form").classList.remove("hidden");
+
+  } else {
+  alert("Email ou senha inválidos");
+  }
+
+  }
+
+  async function verifyCode() {
+
+  const code = document.getElementById("code").value;
+
+  const res = await fetch("/api/auth/login/2fa", {
+  method: "POST",
+  headers: {
+  "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+  email: userEmail,
+  code: code
+  })
+  });
+
+  if (res.ok) {
+
+  window.location.href = "/dashboard";
+
+  } else {
+
+  alert("Código inválido ou expirado");
+
+  }
+
+  }
+
+  </script>
+
+</body>
+</html>
