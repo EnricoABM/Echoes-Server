@@ -16,6 +16,7 @@ import com.n0hana.echoes_server.service.auth.JwtTokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -50,9 +51,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private String recoverToken(HttpServletRequest request) {
         var authHeader = request.getHeader("Authorization");
+        var cookies = request.getCookies();
         
-        if (authHeader == null) return null;
+        if (cookies == null) return null;
+        for (Cookie cookie : request.getCookies()) {
+            if ("access_token".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
 
+        if (authHeader == null) return null;
         return authHeader.replace("Bearer ", "");
     }
     

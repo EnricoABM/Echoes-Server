@@ -33,6 +33,9 @@ import com.n0hana.echoes_server.service.auth.TwoFactorService;
 import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
 import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -114,41 +117,48 @@ public class AuthController {
     }
 
     @PostMapping("/login/2fa")
-    public ResponseEntity<?> loginMFA(@RequestBody VerifyDTO dto) {
-        // Busca o token cadastrado
+    public ResponseEntity<?> loginMFA(
+            @RequestBody VerifyDTO dto,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
         var tokenExists = twoFactorRepository.findByEmail(dto.email());
 
-        // Verifica se o token existe
         if (tokenExists.isEmpty())
             return ResponseEntity.status(404).body("Code not exists");
-        
-        // Recolhe o token
+
         var token = tokenExists.get();
 
-        // Verificações sobre o token
-        // Verifica se foi expirado
         if (token.expiresAt().isBefore(Instant.now()))
             return ResponseEntity.status(401).body("Code expired");
 
-        // Verificação se o token fornecido é o mesmo recuperado
         if (!token.code().equals(dto.code()))
             return ResponseEntity.status(401).body("Invalid code");
-        
-        // Busca os dados do login
+
         var auth = authRepository.find(dto.email());
         if (auth == null)
             return ResponseEntity.status(404).body("Code not exists");
 
-        // Autenticação 
-        var usernamePassword = new UsernamePasswordAuthenticationToken(auth.email(), auth.password());
-        var authToken = this.authenticationManager.authenticate(usernamePassword);
+        var usernamePassword =
+            new UsernamePasswordAuthenticationToken(auth.email(), auth.password());
 
-        // Criação do Token JWT
+        var authToken = authenticationManager.authenticate(usernamePassword);
+
         var jwt = tokenService.generateToken((User) authToken.getPrincipal());
 
-        // Remove dados salvos do usuário da memoria
         authRepository.delete(dto.email());
         twoFactorRepository.deleteByEmail(dto.email());
+
+        String accept = request.getHeader("Accept");
+
+        // BROWSER → COOKIE
+        Cookie cookie = new Cookie("access_token", jwt);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // HTTPS em produção
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 15);
+
+        response.addCookie(cookie);
 
         return ResponseEntity.ok(new AuthResponseDTO(jwt));
     }
@@ -233,11 +243,31 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }    
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String header) {
-        
-        // Verifica se o usuário existe
-        String token = header.replace("Bearer ", "");
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    @RequestHeader(value = "Authorization", required = false) String header) {
+        String token = null;
+
+        // 1️⃣ API → Authorization header
+        if (header != null && header.startsWith("Bearer ")) {
+            token = header.replace("Bearer ", "");
+        }
+
+        // 2️⃣ Browser → Cookie
+        if (token == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("access_token")) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token == null) {
+            return ResponseEntity.badRequest().build();
+        }
 
         String uuid = tokenService.validadeToken(token);
 
@@ -250,7 +280,17 @@ public class AuthController {
         // Revoga todos os tokens do usuário
         User user = opt.get();
 
+        // revoga tokens ativos
         tokenService.revokeAll(user);
+
+        // remove cookie do navegador
+        Cookie cookie = new Cookie("access_token", "");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // HTTPS em produção
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
 
         return ResponseEntity.ok().build();
     }
@@ -259,5 +299,4 @@ public class AuthController {
     public ResponseEntity<Void> authMe() {
         return ResponseEntity.ok().build();
     }
-    
 }
