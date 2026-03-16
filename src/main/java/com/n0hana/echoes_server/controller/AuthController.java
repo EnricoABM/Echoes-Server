@@ -206,7 +206,8 @@ public class AuthController {
         dto = new RegisterRequestDTO(
             dto.name(),
             dto.email(),
-            passwordEncoder.encode(dto.password())
+            passwordEncoder.encode(dto.password()),
+            dto.role()
         );
 
         // Salva os dados do registro
@@ -259,7 +260,7 @@ public class AuthController {
             registerDto.name(), 
             dto.email(), 
             registerDto.password(), 
-            UserRole.TEACHER
+            registerDto.role()
         );
     
         userRepository.save(user);
