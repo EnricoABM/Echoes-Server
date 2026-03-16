@@ -30,7 +30,7 @@ import com.n0hana.echoes_server.repository.PendingRegisterRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
 import com.n0hana.echoes_server.service.auth.TwoFactorService;
-import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
+import com.n0hana.echoes_server.service.notifier.EmailNotifier;
 import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 
 import jakarta.servlet.http.Cookie;
@@ -51,8 +51,9 @@ public class AuthController {
     private final PendingAuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final TwoFactorService twoFactorService;
-    private final LoggerNotifier notifier;
+    private final EmailNotifier notifier;
     private final LoginAttemptService loginAttemptService;
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO dto) {
@@ -73,6 +74,15 @@ public class AuthController {
         // Autenticação primária
         var usernamePassword = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
         
+        /**==================================
+         *  AUTENTICAÇÃO PRIMÁRIA DO SISTEMA
+         * ==================================
+         * Valida as credenciais do usuário,
+         * caso sejam invalidas, adiciona um
+         * contandor de falhas consecutivas 
+         * para bloqueio de tentativas de 
+         * brute force.
+        */
         try {
             // Tenta autenticar o usuário com email e senha
             this.authenticationManager.authenticate(usernamePassword);
@@ -116,6 +126,13 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    /**==================================
+     *  AUTENTICAÇÃO DE MULTI FATOR
+     * ==================================
+     * Após a autenticação primária o 
+     * método é chamado para fornecidmento
+     * do código único de validação
+    */
     @PostMapping("/login/2fa")
     public ResponseEntity<?> loginMFA(
             @RequestBody VerifyDTO dto,
@@ -180,6 +197,12 @@ public class AuthController {
             Instant.now().plusSeconds(300)
         );
         
+        /**==================================
+         *  CRIPTOGRAFIA DE SENHA
+         * ==================================
+         * Criptografia das senha do usuário
+         * usando algoritmo BCrypt.
+         */  
         dto = new RegisterRequestDTO(
             dto.name(),
             dto.email(),
@@ -200,6 +223,13 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+     /**==================================
+     *   VALIDAÇÃO DE EMAIL CADASTRADO
+     * ==================================
+     * Após a autenticação primária o 
+     * método é chamado para fornecidmento
+     * do código único de validação
+    */
     @PostMapping("/register/2fa")
     public ResponseEntity<?> registerMFA(@RequestBody VerifyDTO dto) {
 
@@ -224,8 +254,6 @@ public class AuthController {
         if (registerDto == null)
             return ResponseEntity.status(404).body("Code not exists");
 
-        
-        
         // Cria o novo usuário
         User user = new User(
             registerDto.name(), 
@@ -243,6 +271,13 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }    
 
+    /**==================================
+     *  INVALIDAÇÃO DE SESSÂO NO LOGOUT
+     * ==================================
+     * Busca os tokens armazenados do 
+     * usuário e revoga a validade de 
+     * todos.
+    */
     @GetMapping("/logout")
     public ResponseEntity<Void> logout(
     HttpServletRequest request,
@@ -250,12 +285,12 @@ public class AuthController {
     @RequestHeader(value = "Authorization", required = false) String header) {
         String token = null;
 
-        // 1️⃣ API → Authorization header
+        // API → Authorization header
         if (header != null && header.startsWith("Bearer ")) {
             token = header.replace("Bearer ", "");
         }
 
-        // 2️⃣ Browser → Cookie
+        // Browser → Cookie
         if (token == null && request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals("access_token")) {

@@ -28,6 +28,13 @@ public class JwtTokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
+    /**==================================
+     *  CRIAÇÃO DO TOKEN JWT
+     * ==================================
+     * Após a autenticação primária o 
+     * método é chamado para fornecidmento
+     * do código único de validação
+    */
     public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -45,6 +52,12 @@ public class JwtTokenService {
         }
     }
 
+    /**==================================
+     *  VALIDAÇÃO DO TOKEN JWT
+     * ==================================
+     * Realiza a validação do token JWT e
+     * retorna seu subject.
+    */
     public String validadeToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);

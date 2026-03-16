@@ -10,6 +10,12 @@ import com.n0hana.echoes_server.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+/**=======================================
+ *  CLASSE DE PROTEÇÃO CONTRA BRUTEFORCE
+ * =======================================
+ * Implementa lógica de contagem de falhas
+ * consecutivas e bloqueio de contas
+*/
 @Service
 @RequiredArgsConstructor
 public class LoginAttemptService {
@@ -22,28 +28,21 @@ public class LoginAttemptService {
     public int loginFailed(String email) {
 
         User user = userRepository.findUserByEmail(email).orElse(null);
-
         if (user == null) return 0;
-
         int attempts = user.getLoginAttempts() + 1;
         user.setLoginAttempts(attempts);
-
         if(attempts >= MAX_ATTEMPTS){
             user.setLockUntil(LocalDateTime.now().plus(LOCK_TIME));
         }
-
         userRepository.save(user);
         return attempts;
     }
 
     public void loginSucceeded(String email) {
         User user = userRepository.findUserByEmail(email).orElse(null);
-
         if(user == null) return;
-
         user.setLoginAttempts(0);
         user.setLockUntil(null);
-
         userRepository.save(user);
     }
 }
