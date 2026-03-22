@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.n0hana.echoes_server.dto.PasswordDTO;
 import com.n0hana.echoes_server.service.password.PasswordResetService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 
@@ -41,9 +44,33 @@ public class PasswordController {
     }
     
     @PostMapping("/validate")
-    public ResponseEntity<PasswordDTO.ValidateResponse> validatePasswordToChange(@RequestBody PasswordDTO.ValidateRequest dto, @RequestHeader("Authorization") String token) {
-    
+    public ResponseEntity<PasswordDTO.ValidateResponse> validatePasswordToChange(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    @RequestBody PasswordDTO.ValidateRequest dto,
+    @RequestHeader(value = "Authorization", required = false) String header
+    ) {
         try {
+            String token = null;
+
+            // API → Authorization header
+            if (header != null && header.startsWith("Bearer ")) {
+                token = header.replace("Bearer ", "");
+            }
+
+            // Browser → Cookie
+            if (token == null && request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if (cookie.getName().equals("access_token")) {
+                        token = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+
+            if (token == null) {
+                return ResponseEntity.badRequest().build();
+            }
             String changeToken = service.validatePassword(dto, token);
             return ResponseEntity.ok(new PasswordDTO.ValidateResponse(changeToken));
         } catch (RuntimeException e) {
