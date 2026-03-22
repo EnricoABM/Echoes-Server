@@ -6,6 +6,21 @@
 
   let userEmail;
 
+  const recoverLoading = document.getElementById('recover-loading');
+  const resetLoading = document.getElementById('reset-loading');
+  let loading = false;
+
+  function setLoading(newLoading) {
+    loading = newLoading;
+    if (loading) {
+      recoverLoading.classList.remove('hidden');
+      resetLoading.classList.remove('hidden');
+    } else {
+      recoverLoading.classList.add('hidden');
+      resetLoading.classList.add('hidden');
+    }
+  }
+
   async function sendCode(email) {
     const res = await fetch("/api/password/forgot", {
       method: "POST",
@@ -35,9 +50,11 @@
 
   // STEP 1
   recoverBtn.addEventListener('click', async evt => {
-    evt.preventDefault();
-
     try {
+      evt.preventDefault();
+      if (loading)
+        return;
+      setLoading(true);
       const email = document.getElementById("email").value;
       const res = await sendCode(email);
 
@@ -52,14 +69,18 @@
     } catch (err) {
       console.error(err);
       alert("Um erro ocorreu");
+    } finally {
+      setLoading(false);
     }
   });
 
   // STEP 2
   resetForm.addEventListener('submit', async evt => {
-    evt.preventDefault();
-
     try {
+      evt.preventDefault();
+      if (loading)
+        return;
+      setLoading(true);
       const code = document.getElementById("code").value;
       const password = document.getElementById("new-password").value;
       const confirm = document.getElementById("confirm-password").value;
@@ -78,6 +99,8 @@
     } catch (err) {
       console.error(err);
       alert("Um erro ocorreu");
+    } finally {
+      setLoading(false);
     }
   });
 
