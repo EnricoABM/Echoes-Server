@@ -3,7 +3,6 @@
   const resetForm = document.getElementById("reset-form");
 
   const recoverBtn = document.querySelector('#recover-form > button');
-  const resetBtn = document.querySelector('#reset-form > button');
 
   let userEmail;
 
@@ -57,7 +56,7 @@
   });
 
   // STEP 2
-  resetBtn.addEventListener('click', async evt => {
+  resetForm.addEventListener('submit', async evt => {
     evt.preventDefault();
 
     try {

@@ -1,6 +1,5 @@
 (function(){
   const loginBtn = document.querySelector('#login-form > button[type=submit]');
-  const verifyBtn = document.querySelector('#mfa-form > button[type=submit]');
   const loginForm = document.getElementById("login-form");
   const mfaForm = document.getElementById("mfa-form");
   let userEmail;
@@ -48,7 +47,7 @@
     }
   })
 
-  verifyBtn.addEventListener('click', async evt => {
+  mfaForm.addEventListener('submit', async evt => {
     try {
       evt.preventDefault();
       const code = document.getElementById("code").value;
