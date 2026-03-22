@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.n0hana.echoes_server.model.Token;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
@@ -34,28 +35,31 @@ public class JwtFilter extends OncePerRequestFilter {
         throws ServletException, IOException {
 
         var token = this.recoverToken(request);
-
+        System.out.println("token" + token);
         if (token != null) {
-            var jti = tokenService.extractJti(token); // novo método
-
-            Optional<Token> opt = tokenService.findByJti(jti);
-
-            if (opt.isPresent() && !opt.get().isRevoked()) {
-                var uuid = tokenService.validadeToken(token); // mantém validação do JWT
-                var userExists = userRepository.findById(UUID.fromString(uuid));
-
-                if (userExists.isEmpty()) {
-                    filterChain.doFilter(request, response);
-                    return;
+            try {
+                String jti = tokenService.extractJti(token); // novo método
+                System.out.println("jti" + jti);
+                Optional<Token> opt = tokenService.findByJti(jti);
+                if (opt.isPresent() && !opt.get().isRevoked()) {
+                    var uuid = tokenService.validadeToken(token); // mantém validação do JWT
+                    var userExists = userRepository.findById(UUID.fromString(uuid));
+                    if (userExists.isEmpty()) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+        
+                    UserDetails user = userExists.get();
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            user, null, user.getAuthorities()
+                    );
+        
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
+            } catch (JWTVerificationException e) {
 
-                UserDetails user = userExists.get();
-                var authentication = new UsernamePasswordAuthenticationToken(
-                        user, null, user.getAuthorities()
-                );
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+            
         }
 
       filterChain.doFilter(request, response);

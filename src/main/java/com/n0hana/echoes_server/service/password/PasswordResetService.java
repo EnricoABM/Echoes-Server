@@ -1,6 +1,7 @@
 package com.n0hana.echoes_server.service.password;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import com.n0hana.echoes_server.dto.PasswordDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.UserRepository;
+import com.n0hana.echoes_server.service.TokenBlackListService;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
 import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.password.InMemoryPasswordCodeRepository.CodeType;
@@ -30,6 +32,9 @@ public class PasswordResetService {
     private final InMemoryPasswordCodeRepository codeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtService;
+    private final TokenBlackListService blackListService;
+
+    private final Duration expireDuration = Duration.ofMinutes(5);
 
     public void requestReset(PasswordDTO.ForgotRequest dto) {
         Optional<User> opt = userRepository.findUserByEmail(dto.email());
@@ -100,25 +105,26 @@ public class PasswordResetService {
         return jwtService.generatePasswordChangeToken(user);
     }
 
-    public boolean changePassword(PasswordDTO.ChangeRequest dto) {
+    public void changePassword(PasswordDTO.ChangeRequest dto) {
         if (!dto.newPassword().equals(dto.confirmPassword())) {
-            throw new RuntimeException("AS senhas não coincidem");
+            throw new RuntimeException("As senhas não coincidem");
         }
 
         String token = dto.token();
         token = token.replace("Bearer ", "");
-
         String uuid = jwtService.validatePasswordChangeToken(token);
 
+        if (blackListService.isRevoked(token)) {
+            throw new RuntimeException("Token já utilizado");  
+        }
+    
         User user = userRepository.findById(UUID.fromString(uuid)).orElseThrow( () ->
             new RuntimeException("Usuário não encontrado")
         );
-
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
-
         userRepository.save(user);
 
-        return true;
+        blackListService.revokeToken(token, expireDuration);
     }
 
     private String generateRandomCode() {
