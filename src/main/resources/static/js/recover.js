@@ -62,6 +62,9 @@
     try {
       const code = document.getElementById("code").value;
       const password = document.getElementById("new-password").value;
+      const confirm = document.getElementById("confirm-password").value;
+      if (password !== confirm)
+        return alert("As senhas devem ser equivalentes");
 
       const res = await resetPassword(userEmail, code, password);
 
