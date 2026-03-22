@@ -11,7 +11,6 @@ import com.n0hana.echoes_server.dto.PasswordDTO;
 import com.n0hana.echoes_server.service.password.PasswordResetService;
 
 import lombok.RequiredArgsConstructor;
-import okhttp3.Response;
 
 
 @RestController

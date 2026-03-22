@@ -2,6 +2,7 @@ package com.n0hana.echoes_server.service.password;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,10 +10,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.n0hana.echoes_server.dto.PasswordDTO;
+import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
-import com.n0hana.echoes_server.service.email.EmailService;
+import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.password.InMemoryPasswordCodeRepository.CodeType;
 import com.n0hana.echoes_server.service.password.InMemoryPasswordCodeRepository.PasswordCode;
 
@@ -22,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PasswordResetService {
 
-    private final EmailService emailService;
+    private final TwoFactorNotifier emailNotifier;
     private final UserRepository userRepository;
     private final SecureRandom random = new SecureRandom();
     private final InMemoryPasswordCodeRepository codeRepository;
@@ -45,7 +47,9 @@ public class PasswordResetService {
         passwordCode.setType(CodeType.RESET);
 
         codeRepository.save(passwordCode);
-        emailService.sendPasswordResetToken(user.getEmail(), code);
+        emailNotifier.send(new TwoFactorDto(
+            user.getEmail(), code, LocalDateTime.now().plusMinutes(15).toInstant(ZoneOffset.of("-03:00")))
+        );
     }
 
     public void resetPassword(PasswordDTO.ResetRequest dto) {
