@@ -35,11 +35,9 @@ public class JwtFilter extends OncePerRequestFilter {
         throws ServletException, IOException {
 
         var token = this.recoverToken(request);
-        System.out.println("token" + token);
         if (token != null) {
             try {
                 String jti = tokenService.extractJti(token); // novo método
-                System.out.println("jti" + jti);
                 Optional<Token> opt = tokenService.findByJti(jti);
                 if (opt.isPresent() && !opt.get().isRevoked()) {
                     var uuid = tokenService.validadeToken(token); // mantém validação do JWT

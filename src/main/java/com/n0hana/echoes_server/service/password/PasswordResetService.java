@@ -14,7 +14,7 @@ import com.n0hana.echoes_server.dto.PasswordDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.UserRepository;
-import com.n0hana.echoes_server.service.TokenBlackListService;
+import com.n0hana.echoes_server.service.BlackListService;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
 import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.password.InMemoryPasswordCodeRepository.CodeType;
@@ -32,7 +32,7 @@ public class PasswordResetService {
     private final InMemoryPasswordCodeRepository codeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtService;
-    private final TokenBlackListService blackListService;
+    private final BlackListService blackListService;
 
     private final Duration expireDuration = Duration.ofMinutes(5);
 
@@ -114,7 +114,7 @@ public class PasswordResetService {
         token = token.replace("Bearer ", "");
         String uuid = jwtService.validatePasswordChangeToken(token);
 
-        if (blackListService.isRevoked(token)) {
+        if (blackListService.isRevokedToken(token)) {
             throw new RuntimeException("Token já utilizado");  
         }
     

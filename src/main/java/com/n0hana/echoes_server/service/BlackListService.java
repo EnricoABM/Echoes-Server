@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class TokenBlackListService {
+public class BlackListService {
     
     private final JwtTokenService tokenService;
     private final StringRedisTemplate redis;
@@ -24,8 +24,9 @@ public class TokenBlackListService {
             .set(PREFIX + jti, "revoked", duration);
     }
 
-    public boolean isRevoked(String token) {
+    public boolean isRevokedToken(String token) {
         String jti = tokenService.extractJti(token);
         return redis.hasKey(PREFIX + jti);
     }
+
 }
