@@ -24,7 +24,7 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    private String token;
+    private String jti;
     
     private boolean revoked;
 

@@ -31,37 +31,52 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
+
         var token = this.recoverToken(request);
 
-        Optional<Token> opt = tokenService.findByToken(token);
+        if (token != null) {
+            var jti = tokenService.extractJti(token); // novo método
 
-        if (opt.isPresent() && !opt.get().isRevoked()) {
-            var uuid = tokenService.validadeToken(token);
-            var userExists = userRepository.findById(UUID.fromString(uuid));
-            if (userExists.isEmpty())
-              return;
+            Optional<Token> opt = tokenService.findByJti(jti);
 
-            UserDetails user = userExists.get();
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-        filterChain.doFilter(request, response);
-    }
+            if (opt.isPresent() && !opt.get().isRevoked()) {
+                var uuid = tokenService.validadeToken(token); // mantém validação do JWT
+                var userExists = userRepository.findById(UUID.fromString(uuid));
 
-    private String recoverToken(HttpServletRequest request) {
-        var authHeader = request.getHeader("Authorization");
-        var cookies = request.getCookies();
-        
-        if (cookies == null) return null;
-        for (Cookie cookie : request.getCookies()) {
-            if ("access_token".equals(cookie.getName())) {
-                return cookie.getValue();
+                if (userExists.isEmpty()) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                UserDetails user = userExists.get();
+                var authentication = new UsernamePasswordAuthenticationToken(
+                        user, null, user.getAuthorities()
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
 
-        if (authHeader == null) return null;
-        return authHeader.replace("Bearer ", "");
+      filterChain.doFilter(request, response);
     }
-    
+
+    private String recoverToken(HttpServletRequest request) {
+      var cookies = request.getCookies();
+
+      if (cookies != null) {
+          for (Cookie cookie : cookies) {
+              if ("access_token".equals(cookie.getName())) {
+                  return cookie.getValue();
+              }
+          }
+      }
+
+      var authHeader = request.getHeader("Authorization");
+      if (authHeader != null && authHeader.startsWith("Bearer ")) {
+          return authHeader.substring(7);
+      }
+
+      return null;
+    }    
 }

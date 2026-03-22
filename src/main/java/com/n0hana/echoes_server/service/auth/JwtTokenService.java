@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,13 +40,16 @@ public class JwtTokenService {
     public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
+            UUID jti = UUID.randomUUID();
+            String jtiStr = jti.toString();
             String token = JWT.create()
             .withIssuer(ISSUER)
             .withSubject(user.getId().toString())
+            .withJWTId(jtiStr)
             .withExpiresAt(genExpirationDate())
             .sign(algorithm);
 
-            this.save(token, user);
+            this.save(jtiStr, user);
 
             return token;
         } catch (JWTCreationException exception) {
@@ -78,12 +82,12 @@ public class JwtTokenService {
         return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }
 
-    public void save(String jwt, User user) {
+    public void save(String jti, User user) {
         this.revokeAll(user);
 
         Token token = new Token(
             null,
-            jwt,
+            jti,
             false,
             user
         );
@@ -99,8 +103,8 @@ public class JwtTokenService {
         jwtTokenRepository.saveAll(tokens);
     }
 
-    public Optional<Token> findByToken(String token) {
-        return jwtTokenRepository.findByToken(token);
+    public Optional<Token> findByJti(String jti) {
+        return jwtTokenRepository.findByJti(jti);
     }
 
     /**===========================
@@ -111,9 +115,12 @@ public class JwtTokenService {
     public String generatePasswordChangeToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
+            UUID jti = UUID.randomUUID();
+            String jtiStr = jti.toString();
             String token = JWT.create()
                 .withIssuer(ISSUER)
                 .withSubject(user.getId().toString())
+                .withJWTId(jtiStr)
                 .withExpiresAt(genExpirationDatePasswordToken())
                 .sign(algorithm);
 
@@ -138,6 +145,14 @@ public class JwtTokenService {
             System.err.println("Erro na verificação: " + e.getMessage());
             return "";
         }
+    }
+
+    public String extractJti(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.require(algorithm)
+          .build()
+          .verify(token)
+          .getId(); // <-- isso é o JTI
     }
 
     public Instant genExpirationDatePasswordToken() {
