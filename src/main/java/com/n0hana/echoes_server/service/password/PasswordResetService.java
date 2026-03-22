@@ -55,30 +55,23 @@ public class PasswordResetService {
     public void resetPassword(PasswordDTO.ResetRequest dto) {
         String code = dto.code();
 
-        PasswordCode savedCode = codeRepository.getCode(dto.email());
+        PasswordCode savedCode = Optional.ofNullable(codeRepository.getCode(dto.email()))
+            .orElseThrow(() -> new RuntimeException("Nenhum código de redefinição encontrado"));
 
         if (!code.equals(savedCode.getCode())) {
-            throw new RuntimeException("Código de Redefinição de Senha Incorreto");
+               throw new RuntimeException("Código de Redefinição de Senha Incorreto");
         }
 
         if (savedCode.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Código Expirado");
         }
 
-        if (savedCode.getType().equals(CodeType.RESET)) {
+        if (!savedCode.getType().equals(CodeType.RESET)) {
             throw new RuntimeException("Código Incorreto");
         }
 
-        System.out.printf(
-            "new: '%s' (%d) | confirm: '%s' (%d)%n",
-            dto.newPassword(),
-            dto.newPassword().length(),
-            dto.confirmPassword(),
-            dto.confirmPassword().length()
-        );
-
         if (!dto.newPassword().equals(dto.confirmPassword())) {
-            throw new RuntimeException("As senhas não são indenticas");
+            throw new RuntimeException("As senhas não são identicas");
         }
 
         User user = userRepository.findUserByEmail(dto.email()).orElseThrow( () ->
@@ -101,15 +94,15 @@ public class PasswordResetService {
         );
 
         String password = user.getPassword();
-        if (passwordEncoder.matches(dto.password(), password)) {
-            return jwtService.generatePasswordChangeToken(user);
+        if (!passwordEncoder.matches(dto.password(), password)) {
+            throw new RuntimeException("Senha incorreta");
         } 
-        return "";
+        return jwtService.generatePasswordChangeToken(user);
     }
 
-    public boolean changePassowrd(PasswordDTO.ChangeRequest dto) {
+    public boolean changePassword(PasswordDTO.ChangeRequest dto) {
         if (!dto.newPassword().equals(dto.confirmPassword())) {
-            return false;
+            throw new RuntimeException("AS senhas não coincidem");
         }
 
         String token = dto.token();
