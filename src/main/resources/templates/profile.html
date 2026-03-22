@@ -1,31 +1,9 @@
 
 <!DOCTYPE html>
 
-<html lang="pt-BR">
+<html th:replace="layout :: layout('Perfil', ~{::body})">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Perfil</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          primary: "#2e4c9b"
-        }
-      }
-    }
-  }
-  </script>
-
-</head>
-
-<body class="bg-gray-100 h-screen">
+<body>
 
 <div class="flex h-full">
 
