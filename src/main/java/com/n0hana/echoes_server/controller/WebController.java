@@ -21,6 +21,11 @@ public class WebController {
         return "register";
     }
 
+    @GetMapping("/recover")
+    public String recover(Model model) {
+        return "recover";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(@CookieValue(value = "access_token", required = false) String token) {
 
