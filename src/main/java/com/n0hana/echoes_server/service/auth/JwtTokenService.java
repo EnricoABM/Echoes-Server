@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtTokenService {
 
     private final JwtTokenRepository jwtTokenRepository;
+    private final String ISSUER = "auth-api";
 
     @Value("${api.security.token.secret}")
     private String secret;
@@ -39,7 +40,7 @@ public class JwtTokenService {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
-            .withIssuer("auth-api")
+            .withIssuer(ISSUER)
             .withSubject(user.getId().toString())
             .withExpiresAt(genExpirationDate())
             .sign(algorithm);
@@ -62,7 +63,7 @@ public class JwtTokenService {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
-                .withIssuer("auth-api")
+                .withIssuer(ISSUER)
                 .build()
                 .verify(token)
                 .getSubject();    
@@ -74,7 +75,7 @@ public class JwtTokenService {
     }
 
     private Instant genExpirationDate() {
-        return LocalDateTime.now().plusHours(10).toInstant(ZoneOffset.of("-03:00"));
+        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }
 
     public void save(String jwt, User user) {
@@ -101,4 +102,46 @@ public class JwtTokenService {
     public Optional<Token> findByToken(String token) {
         return jwtTokenRepository.findByToken(token);
     }
+
+    /**===========================
+     * TOKEN DE ALTERAÇÃO DE SENHA
+     * =========================== */
+
+    /** CRIAÇÃO DO TOKEN DE ALTERAÇÃO */
+    public String generatePasswordChangeToken(User user) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            String token = JWT.create()
+                .withIssuer(ISSUER)
+                .withSubject(user.getId().toString())
+                .withExpiresAt(genExpirationDatePasswordToken())
+                .sign(algorithm);
+
+            return token;
+
+        } catch (JWTCreationException e) {
+            throw new RuntimeException("Erro ao criar token JWT");
+        }
+    }
+
+      /** VALIDAÇÃO DO TOKEN DE ALTERAÇÃO */
+    public String validatePasswordChangeToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.require(algorithm)
+                .withIssuer(ISSUER)
+                .build()
+                .verify(token)
+                .getSubject();    
+                
+        } catch (JWTVerificationException e) {
+            System.err.println("Erro na verificação: " + e.getMessage());
+            return "";
+        }
+    }
+
+    public Instant genExpirationDatePasswordToken() {
+        return LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.of("-03:00")); 
+    }
+
 }

@@ -23,7 +23,6 @@ import com.n0hana.echoes_server.dto.RegisterRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
 import com.n0hana.echoes_server.model.User;
-import com.n0hana.echoes_server.model.UserRole;
 import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.repository.PendingAuthRepository;
 import com.n0hana.echoes_server.repository.PendingRegisterRepository;

@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .requestMatchers("/", "/register", "/css/**", "/js/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/register/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/password/forgot").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/password/reset").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
