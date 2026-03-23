@@ -51,7 +51,7 @@ public class AuthController {
     private final PendingAuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final TwoFactorService twoFactorService;
-    private final LoggerNotifier notifier;
+    private final EmailNotifier notifier;
     private final LoginAttemptService loginAttemptService;
 
 
