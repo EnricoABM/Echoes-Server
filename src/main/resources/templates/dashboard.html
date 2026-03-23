@@ -1,63 +1,13 @@
 <!DOCTYPE html>
 
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Dashboard</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          primary: "#2e4c9b"
-        }
-      }
-    }
-  }
-  </script>
-
-</head>
-
-<body class="bg-gray-100 h-screen">
+<html th:replace="layout :: layout('Dashboard', ~{::body})">
+<body>
 
   <div class="flex h-full">
 
     <!-- Sidebar -->
 
-    <aside class="w-64 bg-primary text-white flex flex-col">
-
-      <div class="p-6 text-xl font-bold border-b border-blue-800">
-        Dashboard
-      </div>
-
-      <nav class="flex-1 p-4 space-y-2">
-
-        <a href="/dashboard"
-           class="block px-4 py-2 rounded hover:bg-blue-800 transition">
-          Dashboard
-        </a>
-
-        <a href="/dashboard/profile"
-           class="block px-4 py-2 rounded hover:bg-blue-800 transition">
-          Perfil
-        </a>
-
-      </nav>
-
-      <div class="p-4 border-t border-blue-800">
-        <button
-          id="logout-btn"
-          class="w-full bg-red-500 hover:bg-red-600 py-2 rounded transition">
-          Sair
-        </button>
-      </div>
-
-    </aside>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
 
 
     <main class="flex-1 p-10">
