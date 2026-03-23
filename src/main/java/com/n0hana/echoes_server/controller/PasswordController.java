@@ -13,6 +13,7 @@ import com.n0hana.echoes_server.service.password.PasswordResetService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
@@ -24,7 +25,7 @@ public class PasswordController {
     private final PasswordResetService service;
 
     @PostMapping("/forgot")
-    public ResponseEntity<PasswordDTO.ForgotResponse> forgotPassword(@RequestBody PasswordDTO.ForgotRequest dto) {
+    public ResponseEntity<PasswordDTO.ForgotResponse> forgotPassword(@RequestBody @Valid PasswordDTO.ForgotRequest dto) {
         
         service.requestReset(dto);
         return ResponseEntity.ok(
@@ -33,7 +34,7 @@ public class PasswordController {
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<PasswordDTO.ResetResponse> resetPassword(@RequestBody PasswordDTO.ResetRequest dto) {
+    public ResponseEntity<PasswordDTO.ResetResponse> resetPassword(@RequestBody @Valid PasswordDTO.ResetRequest dto) {
            
         try {
             service.resetPassword(dto);
@@ -47,7 +48,7 @@ public class PasswordController {
     public ResponseEntity<PasswordDTO.ValidateResponse> validatePasswordToChange(
     HttpServletRequest request,
     HttpServletResponse response,
-    @RequestBody PasswordDTO.ValidateRequest dto,
+    @RequestBody @Valid PasswordDTO.ValidateRequest dto,
     @RequestHeader(value = "Authorization", required = false) String header
     ) {
         try {
@@ -80,7 +81,7 @@ public class PasswordController {
 
 
     @PostMapping("/change")
-    public ResponseEntity<Void> changePassword(@RequestBody PasswordDTO.ChangeRequest dto) {
+    public ResponseEntity<Void> changePassword(@RequestBody @Valid PasswordDTO.ChangeRequest dto) {
         try {
             service.changePassword(dto);
             return ResponseEntity.ok().build();
