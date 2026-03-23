@@ -23,7 +23,6 @@ import com.n0hana.echoes_server.dto.RegisterRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
 import com.n0hana.echoes_server.model.User;
-import com.n0hana.echoes_server.model.UserRole;
 import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.repository.PendingAuthRepository;
 import com.n0hana.echoes_server.repository.PendingRegisterRepository;
@@ -31,11 +30,13 @@ import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
 import com.n0hana.echoes_server.service.auth.TwoFactorService;
 import com.n0hana.echoes_server.service.notifier.EmailNotifier;
+import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
 import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -51,7 +52,7 @@ public class AuthController {
     private final PendingAuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final TwoFactorService twoFactorService;
-    private final EmailNotifier notifier;
+    private final LoggerNotifier notifier;
     private final LoginAttemptService loginAttemptService;
 
 
@@ -181,7 +182,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequestDTO dto) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequestDTO dto) {
         
         // Verifica se o usuário já existe
         var exists = userRepository.findUserByEmail(dto.email());

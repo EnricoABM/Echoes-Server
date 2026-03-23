@@ -11,7 +11,7 @@ import com.n0hana.echoes_server.model.Token;
 
 public interface JwtTokenRepository extends JpaRepository<Token, Long> {
     
-    Optional<Token> findByToken(String token);
+    Optional<Token> findByJti(String jti);
 
     List<Token> findAllByUserId(UUID userId);
 }

@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.n0hana.echoes_server.model.Token;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
@@ -31,37 +32,53 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
+
         var token = this.recoverToken(request);
+        if (token != null) {
+            try {
+                String jti = tokenService.extractJti(token); // novo método
+                Optional<Token> opt = tokenService.findByJti(jti);
+                if (opt.isPresent() && !opt.get().isRevoked()) {
+                    var uuid = tokenService.validadeToken(token); // mantém validação do JWT
+                    var userExists = userRepository.findById(UUID.fromString(uuid));
+                    if (userExists.isEmpty()) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+        
+                    UserDetails user = userExists.get();
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            user, null, user.getAuthorities()
+                    );
+        
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (JWTVerificationException e) {
 
-        Optional<Token> opt = tokenService.findByToken(token);
-
-        if (opt.isPresent() && !opt.get().isRevoked()) {
-            var uuid = tokenService.validadeToken(token);
-            var userExists = userRepository.findById(UUID.fromString(uuid));
-            if (userExists.isEmpty())
-              return;
-
-            UserDetails user = userExists.get();
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            
         }
-        filterChain.doFilter(request, response);
+
+      filterChain.doFilter(request, response);
     }
 
     private String recoverToken(HttpServletRequest request) {
-        var authHeader = request.getHeader("Authorization");
-        var cookies = request.getCookies();
-        
-        if (cookies == null) return null;
-        for (Cookie cookie : request.getCookies()) {
-            if ("access_token".equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
+      var cookies = request.getCookies();
 
-        if (authHeader == null) return null;
-        return authHeader.replace("Bearer ", "");
-    }
-    
+      if (cookies != null) {
+          for (Cookie cookie : cookies) {
+              if ("access_token".equals(cookie.getName())) {
+                  return cookie.getValue();
+              }
+          }
+      }
+
+      var authHeader = request.getHeader("Authorization");
+      if (authHeader != null && authHeader.startsWith("Bearer ")) {
+          return authHeader.substring(7);
+      }
+
+      return null;
+    }    
 }

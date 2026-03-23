@@ -1,9 +1,22 @@
 (function(){
   const loginBtn = document.querySelector('#login-form > button[type=submit]');
-  const verifyBtn = document.querySelector('#mfa-form > button[type=submit]');
   const loginForm = document.getElementById("login-form");
   const mfaForm = document.getElementById("mfa-form");
+  const loginLoading = document.getElementById('login-loading');
+  const mfaLoading = document.getElementById('mfa-loading');
+  let loading = false;
   let userEmail;
+
+  function setLoading(newLoading) {
+    loading = newLoading;
+    if (loading) {
+      loginLoading.classList.remove('hidden');
+      mfaLoading.classList.remove('hidden');
+    } else {
+      loginLoading.classList.add('hidden');
+      mfaLoading.classList.add('hidden');
+    }
+  }
 
   async function login(email, password) {
     const res = await fetch("/api/auth/login", {
@@ -33,6 +46,9 @@
   loginBtn.addEventListener('click', async evt => {
     try {
       evt.preventDefault();
+      if (loading)
+        return;
+      setLoading(true);
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const res = await login(email, password);
@@ -45,12 +61,17 @@
     } catch(err) {
       console.error(err);
       alert('Um erro ocorreu');
+    } finally {
+      setLoading(false);
     }
   })
 
-  verifyBtn.addEventListener('click', async evt => {
+  mfaForm.addEventListener('submit', async evt => {
     try {
       evt.preventDefault();
+      if (loading)
+        return;
+      setLoading(true);
       const code = document.getElementById("code").value;
       const res = await verifyCode(userEmail, code);
       if (res)
@@ -60,6 +81,8 @@
     } catch(err) {
       console.error(err);
       alert('Um erro ocorreu');
+    } finally {
+      setLoading(false);
     }
   })
 })()
