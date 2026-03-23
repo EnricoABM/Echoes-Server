@@ -42,17 +42,29 @@
         placeholder="Código"
         type="text"
         minlength="6"
+        inputmode="numeric"
+        pattern="\d{6}"
+        title="Digite um código de 6 dígitos"
+        required
         >
 
         <input id="new-password"
         class="w-full border p-2 rounded mb-4"
         placeholder="Nova senha"
-        type="password">
+        type="password"
+        required
+        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+        title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
+        >
 
         <input id="confirm-password"
         class="w-full border p-2 rounded mb-4"
         placeholder="Confirme a senha"
-        type="password">
+        type="password"
+        required
+        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+        title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
+        >
 
         <div id="reset-loading" class="hidden flex justify-center mt-4">
           <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-primary"></div>

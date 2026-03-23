@@ -27,8 +27,13 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Senha</label>
-          <input type="password" id="password" required
-          class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"/>
+          <input
+            type="password"
+            id="password"
+            required
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+            title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
+            class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"/>
         </div>
 
         <div>
@@ -66,6 +71,10 @@
         placeholder="Digite o código"
         class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
         minlength="6"
+        inputmode="numeric"
+        pattern="\d{6}"
+        title="Digite um código de 6 dígitos"
+        required
         />
 
         <div id="mfa-loading" class="hidden flex justify-center mt-4">
