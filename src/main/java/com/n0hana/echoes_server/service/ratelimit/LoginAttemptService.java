@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.UserRepository;
+import com.n0hana.echoes_server.service.logs.Auditable;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +26,7 @@ public class LoginAttemptService {
     public final int MAX_ATTEMPTS = 5;
     private final Duration LOCK_TIME = Duration.ofMinutes(30);
 
+    @Auditable(action = "Falha na Tentativa de Login", entity = "LOGIN")
     public int loginFailed(String email) {
 
         User user = userRepository.findUserByEmail(email).orElse(null);
@@ -38,6 +40,7 @@ public class LoginAttemptService {
         return attempts;
     }
 
+    @Auditable(action = "Login Bem Sucedido", entity = "LOGIN")
     public void loginSucceeded(String email) {
         User user = userRepository.findUserByEmail(email).orElse(null);
         if(user == null) return;

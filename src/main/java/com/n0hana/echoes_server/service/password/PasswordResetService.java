@@ -37,7 +37,7 @@ public class PasswordResetService {
 
     private final Duration expireDuration = Duration.ofMinutes(5);
 
-    @Auditable(action = "REQUEST RESET PASSWORD", entity = "PASSWORD")
+    @Auditable(action = "Solicitação de Redefinição de Senha", entity = "PASSWORD")
     public void requestReset(PasswordDTO.ForgotRequest dto) {
         Optional<User> opt = userRepository.findUserByEmail(dto.email());
 
@@ -59,7 +59,7 @@ public class PasswordResetService {
         );
     }
 
-    @Auditable(action = "RESET PASSWORD", entity = "PASSWORD")
+    @Auditable(action = "Redefinição de Senha", entity = "PASSWORD")
     public void resetPassword(PasswordDTO.ResetRequest dto) {
         String code = dto.code();
 
@@ -91,7 +91,7 @@ public class PasswordResetService {
         userRepository.save(user);
     }
 
-    @Auditable(action = "REQUEST CHANGE PASSWORD", entity = "PASSWORD")
+    @Auditable(action = "Solicitação de Alteração de Senha", entity = "PASSWORD")
     public String validatePassword(PasswordDTO.ValidateRequest dto, String token) {
 
         token = token.replace("Bearer ", "");
@@ -110,7 +110,7 @@ public class PasswordResetService {
         return jwtService.generatePasswordChangeToken(user);
     }
 
-    @Auditable(action = "CHANGE PASSWORD", entity = "PASSWORD")
+    @Auditable(action = "Alteração de Senha", entity = "PASSWORD")
     public void changePassword(PasswordDTO.ChangeRequest dto) {
     
         if (!dto.newPassword().equals(dto.confirmPassword())) {
