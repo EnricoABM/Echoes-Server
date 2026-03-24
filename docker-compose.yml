@@ -13,6 +13,15 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+  redis:
+    image: redis:7.2
+    container_name: echoes_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
   app:
     build: .
     env_file:
@@ -21,6 +30,7 @@ services:
     restart: always
     depends_on:
       - db
+      - redis
     ports:
       - "8080:8080"
     environment:
@@ -29,5 +39,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
+      # Redis config (Spring Boot padrão)
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+
 volumes:
   mysql_data:
+  redis_data:
