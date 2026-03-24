@@ -64,8 +64,9 @@
       setLoading(false);
     }
   })
-  document.getElementById('change-btn').addEventListener('click', async () => {
+  newPasswordSection.addEventListener('submit', async evt => {
     try {
+      evt.preventDefault();
       if (loading)
         return;
       setLoading(true);

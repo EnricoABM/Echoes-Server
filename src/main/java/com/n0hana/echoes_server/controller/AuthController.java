@@ -36,6 +36,7 @@ import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -181,7 +182,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequestDTO dto) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequestDTO dto) {
         
         // Verifica se o usuário já existe
         var exists = userRepository.findUserByEmail(dto.email());

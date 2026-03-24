@@ -59,18 +59,26 @@
           </button>
 
           <!-- Nova senha (inicialmente escondido) -->
-          <div id="newPasswordSection" class="mt-6 hidden">
+          <form id="newPasswordSection" class="mt-6 hidden">
 
             <div class="mb-4">
               <label class="text-sm text-gray-600">Nova senha</label>
               <input type="password" id="newPassword"
-                     class="w-full mt-1 p-2 border rounded" />
+                     class="w-full mt-1 p-2 border rounded"
+                     required
+                     pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+                     title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
+                     />
             </div>
 
             <div class="mb-4">
               <label class="text-sm text-gray-600">Confirme a nova senha</label>
               <input type="password" id="confirmPassword"
-                     class="w-full mt-1 p-2 border rounded" />
+                     class="w-full mt-1 p-2 border rounded"
+                     required
+                     pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+                     title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
+                     />
             </div>
 
             <div id="change-loading" class="hidden flex justify-center mt-4">
@@ -78,7 +86,7 @@
             </div>
             <br>
 
-            <button id="change-btn"
+            <button type="submit"
                     class="bg-green-600 text-white px-4 py-2 rounded">
               Alterar senha
             </button>
