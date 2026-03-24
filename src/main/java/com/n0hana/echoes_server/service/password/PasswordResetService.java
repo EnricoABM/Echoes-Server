@@ -16,6 +16,7 @@ import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.BlackListService;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
+import com.n0hana.echoes_server.service.logs.Auditable;
 import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.password.InMemoryPasswordCodeRepository.CodeType;
 import com.n0hana.echoes_server.service.password.InMemoryPasswordCodeRepository.PasswordCode;
@@ -36,6 +37,7 @@ public class PasswordResetService {
 
     private final Duration expireDuration = Duration.ofMinutes(5);
 
+    @Auditable(action = "REQUEST RESET PASSWORD", entity = "PASSWORD")
     public void requestReset(PasswordDTO.ForgotRequest dto) {
         Optional<User> opt = userRepository.findUserByEmail(dto.email());
 
@@ -57,6 +59,7 @@ public class PasswordResetService {
         );
     }
 
+    @Auditable(action = "RESET PASSWORD", entity = "PASSWORD")
     public void resetPassword(PasswordDTO.ResetRequest dto) {
         String code = dto.code();
 
@@ -88,6 +91,7 @@ public class PasswordResetService {
         userRepository.save(user);
     }
 
+    @Auditable(action = "REQUEST CHANGE PASSWORD", entity = "PASSWORD")
     public String validatePassword(PasswordDTO.ValidateRequest dto, String token) {
 
         token = token.replace("Bearer ", "");
@@ -102,10 +106,13 @@ public class PasswordResetService {
         if (!passwordEncoder.matches(dto.password(), password)) {
             throw new RuntimeException("Senha incorreta");
         } 
+
         return jwtService.generatePasswordChangeToken(user);
     }
 
+    @Auditable(action = "CHANGE PASSWORD", entity = "PASSWORD")
     public void changePassword(PasswordDTO.ChangeRequest dto) {
+    
         if (!dto.newPassword().equals(dto.confirmPassword())) {
             throw new RuntimeException("As senhas não coincidem");
         }
