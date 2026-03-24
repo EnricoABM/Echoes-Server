@@ -29,7 +29,19 @@
       },
       body: JSON.stringify({ email })
     });
-    return res.ok;
+    let message = '';
+    if (!res.ok) {
+      if (res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After');
+        message = `Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`;
+      } else {
+        message = 'Erro ao enviar código';
+      }
+    }
+    return {
+      ok: res.ok,
+      message,
+    };
   }
 
   async function resetPassword(email, code, password) {
@@ -45,7 +57,19 @@
         confirmPassword: password,
       })
     });
-    return res.ok;
+    let message = '';
+    if (!res.ok) {
+      if (res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After');
+        message = `Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`;
+      } else {
+        message = 'Código inválido ou expirado';
+      }
+    }
+    return {
+      ok: res.ok,
+      message,
+    };
   }
 
   // STEP 1
@@ -58,12 +82,12 @@
       const email = document.getElementById("email").value;
       const res = await sendCode(email);
 
-      if (res) {
+      if (res.ok) {
         userEmail = email;
         recoverForm.classList.add("hidden");
         resetForm.classList.remove("hidden");
       } else {
-        alert("Erro ao enviar código");
+        alert(res.message);
       }
 
     } catch (err) {
@@ -89,11 +113,11 @@
 
       const res = await resetPassword(userEmail, code, password);
 
-      if (res) {
+      if (res.ok) {
         alert("Senha redefinida com sucesso");
         window.location.href = "/";
       } else {
-        alert("Código inválido ou expirado");
+        alert(res.message);
       }
 
     } catch (err) {

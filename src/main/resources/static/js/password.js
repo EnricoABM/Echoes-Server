@@ -24,11 +24,25 @@
       },
       body: JSON.stringify({ password }),
     })
-    if (!res.ok)
-      return false;
+    let message = '';
+    if (!res.ok) {
+      if (res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After');
+        message = `Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`;
+      } else {
+        message = 'Senha incorreta';
+      }
+      return {
+        ok: false,
+        message,
+      }
+    }
     const data = await res.json();
     resetToken = data.token;
-    return true;
+    return {
+      ok: true,
+      message,
+    };
   }
   async function changePassword(password) {
     const res = await fetch('/api/password/change', {
@@ -42,7 +56,19 @@
         confirmPassword: password,
       }),
     })
-    return res.ok;
+    let message = '';
+    if (!res.ok) {
+      if (res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After');
+        message = `Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`;
+      } else {
+        message = 'Um erro ocorreu';
+      }
+    }
+    return {
+      ok: res.ok,
+      message,
+    };
   }
 
   document.getElementById('validate-btn').addEventListener('click', async () => {
@@ -51,9 +77,9 @@
         return;
       setLoading(true);
       const current = document.getElementById('currentPassword').value;
-      const ok = await validatePassword(current);
-      if (!ok)
-        return alert('Senha incorreta');
+      const res = await validatePassword(current);
+      if (!res.ok)
+        return alert(res.message);
 
       newPasswordSection.classList.remove("hidden");
       startTokenWatcher(resetToken);
@@ -74,9 +100,9 @@
       const confirmPass = document.getElementById('confirmPassword').value;
       if (newPass !== confirmPass)
         return alert('As senhas não são equivalentes');
-      const ok = await changePassword(newPass);
-      if (!ok)
-        alert('Um erro ocorreu');
+      const res = await changePassword(newPass);
+      if (!res.ok)
+        alert(res.message);
     } catch(err) {
       console.error(err);
       alert('Um erro ocorreu');

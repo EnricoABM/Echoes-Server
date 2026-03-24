@@ -26,7 +26,19 @@
       },
       body: JSON.stringify({ email, password })
     });
-    return res.ok;
+    let message = '';
+    if (!res.ok) {
+      if (res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After');
+        message = `Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`;
+      } else {
+        message = 'Credenciais inválidas';
+      }
+    }
+    return {
+      ok: res.ok,
+      message,
+    };
   }
 
   async function verifyCode(email, code) {
@@ -40,7 +52,19 @@
         code,
       })
     });
-    return res.ok;
+    let message = '';
+    if (!res.ok) {
+      if (res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After');
+        message = `Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`;
+      } else {
+        message = 'Código inválido';
+      }
+    }
+    return {
+      ok: res.ok,
+      message,
+    };
   }
 
   loginBtn.addEventListener('click', async evt => {
@@ -52,12 +76,13 @@
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const res = await login(email, password);
-      if (res) {
+      if (res.ok) {
         userEmail = email;
         loginForm.classList.add("hidden");
         mfaForm.classList.remove("hidden");
-      } else
-        alert('Email ou senha inválidos');
+      } else {
+        alert(res.message);
+      }
     } catch(err) {
       console.error(err);
       alert('Um erro ocorreu');
@@ -74,10 +99,10 @@
       setLoading(true);
       const code = document.getElementById("code").value;
       const res = await verifyCode(userEmail, code);
-      if (res)
+      if (res.ok)
         window.location.href = '/dashboard';
       else
-        alert("Código inválido ou expirado");
+        alert(res.message);
     } catch(err) {
       console.error(err);
       alert('Um erro ocorreu');
