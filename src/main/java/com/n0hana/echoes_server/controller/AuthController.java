@@ -29,7 +29,7 @@ import com.n0hana.echoes_server.repository.PendingRegisterRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
 import com.n0hana.echoes_server.service.auth.TwoFactorService;
-import com.n0hana.echoes_server.service.notifier.EmailNotifier;
+import com.n0hana.echoes_server.service.logs.Auditable;
 import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
 import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 
@@ -54,9 +54,9 @@ public class AuthController {
     private final TwoFactorService twoFactorService;
     private final LoggerNotifier notifier;
     private final LoginAttemptService loginAttemptService;
-
-
+    
     @PostMapping("/login")
+    @Auditable(action = "Envio das credenciais para login", entity = "LOGIN")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO dto) {
 
         // Verifica se o Usuário existe
@@ -127,14 +127,14 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    /**==================================
-     *  AUTENTICAÇÃO DE MULTI FATOR
-     * ==================================
+    /** AUTENTICAÇÃO DE MULTI FATOR
+     * 
      * Após a autenticação primária o 
      * método é chamado para fornecidmento
      * do código único de validação
     */
     @PostMapping("/login/2fa")
+    @Auditable(action = "Envio do código multifator para login", entity = "LOGIN")
     public ResponseEntity<?> loginMFA(
             @RequestBody VerifyDTO dto,
             HttpServletRequest request,
@@ -182,6 +182,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Auditable(action = "Envio das credenciais para registro", entity = "REGISTER")
     public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequestDTO dto) {
         
         // Verifica se o usuário já existe
@@ -225,14 +226,14 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-     /**==================================
-     *   VALIDAÇÃO DE EMAIL CADASTRADO
-     * ==================================
+     /** VALIDAÇÃO DE EMAIL CADASTRADO
+     * 
      * Após a autenticação primária o 
      * método é chamado para fornecidmento
      * do código único de validação
     */
     @PostMapping("/register/2fa")
+    @Auditable(action = "Envio de código multifator para registro", entity = "REGISTER")
     public ResponseEntity<?> registerMFA(@RequestBody VerifyDTO dto) {
 
         // Verifica se o código existe
@@ -273,14 +274,14 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }    
 
-    /**==================================
-     *  INVALIDAÇÃO DE SESSÂO NO LOGOUT
-     * ==================================
+    /** INVALIDAÇÃO DE SESSÂO NO LOGOUT
+     * 
      * Busca os tokens armazenados do 
      * usuário e revoga a validade de 
      * todos.
     */
     @GetMapping("/logout")
+    @Auditable(action = "Tentativa de Logout", entity = "LOGIN")
     public ResponseEntity<Void> logout(
     HttpServletRequest request,
     HttpServletResponse response,
