@@ -30,7 +30,6 @@
         password: document.getElementById("password").value,
         role: document.getElementById("role").value
       };
-      console.log(data)
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
@@ -44,7 +43,12 @@
         registerForm.classList.add('hidden');
         mfaForm.classList.remove('hidden');
       } else {
-        alert('Erro ao registrar');
+        if (res.status === 429) {
+          const retryAfter = res.headers.get('Retry-After');
+          alert(`Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`);
+        } else {
+          alert('Erro ao registrar');
+        }
       }
     } catch(err) {
       console.error(err);
@@ -74,7 +78,12 @@
       if (res.ok)
         window.location.href = '/';
       else
-        alert('Código inválido');
+        if (res.status === 429) {
+          const retryAfter = res.headers.get('Retry-After');
+          alert(`Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`);
+        } else {
+          alert('Código inválido');
+        }
     } catch(err) {
       console.error(err);
       alert('Um erro ocorreu');
