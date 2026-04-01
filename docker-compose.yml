@@ -4,10 +4,9 @@ services:
     container_name: echoes_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: echoes
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -35,8 +34,8 @@ services:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/echoes
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
       # Redis config (Spring Boot padrão)
