@@ -38,9 +38,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
-      # Redis config (Spring Boot padrão)
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT}
 
 volumes:
   mysql_data:
