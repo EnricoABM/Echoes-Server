@@ -1,84 +1,200 @@
 <!DOCTYPE html>
 <html th:replace="layout :: layout('Login', ~{::body})">
-
 <body>
+<main class="login-page">
 
-  <main class="flex items-center justify-center h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@600&display=swap');
 
-      <h1 class="text-2xl text-primary font-bold text-center mb-6">
-        Login
-      </h1>
+    :root {
+      --color-navy:        #0a1e42;
+      --color-navy-mid:    #185fa5;
+      --color-navy-light:  #cdd8ea;
+      --color-bg:          #f0f4f8;
+      --color-surface:     #ffffff;
+      --color-input-bg:    #f5f8fc;
+      --color-text:        #0a1e42;
+      --color-text-muted:  #5f7a99;
+      --color-placeholder: #8fa3c0;
+      --color-focus-ring:  rgba(24, 95, 165, 0.12);
+    }
 
-      <!-- LOGIN FORM -->
-      <form id="login-form">
+    .login-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: var(--color-bg);
+    }
 
-        <input id="email"
-        class="w-full border p-2 rounded mb-3"
-        placeholder="Email"
-        type="email">
+    .login-card {
+      background: var(--color-surface);
+      padding: 2.5rem 2rem;
+      border-radius: 16px;
+      border: 0.5px solid var(--color-navy-light);
+      box-shadow: 0 4px 32px rgba(10, 30, 66, 0.10);
+      width: 100%;
+      max-width: 380px;
+      animation: fade-up 0.45s ease both;
+    }
 
-        <input id="password"
-        class="w-full border p-2 rounded mb-4"
-        placeholder="Senha"
-        type="password">
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-        <div id="login-loading" class="hidden flex justify-center mt-4">
-          <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-primary"></div>
-        </div>
-        <br>
+    .login-card h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--color-navy);
+      text-align: center;
+      margin-bottom: 1.75rem;
+      letter-spacing: -0.3px;
+    }
 
-        <button
-          type="submit"
-          class="bg-primary w-full text-white p-2 rounded">
-          Entrar
-        </button>
+    #login-form,
+    #mfa-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
 
-      </form>
+    #mfa-form p {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
 
-      <!-- 2FA FORM -->
-      <form id="mfa-form" class="hidden">
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      background: var(--color-input-bg);
+      border: 1px solid var(--color-navy-light);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--color-text);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
 
-        <p class="text-sm text-gray-600 mb-3">
-        Digite o código enviado para seu email
-        </p>
+    input::placeholder {
+      color: var(--color-placeholder);
+    }
 
-        <input id="code"
-        class="w-full border p-2 rounded mb-4"
-        placeholder="Código de verificação"
-        type="text"
-        minlength="6"
-        >
+    input:focus {
+      border-color: var(--color-navy-mid);
+      background: var(--color-surface);
+      box-shadow: 0 0 0 3px var(--color-focus-ring);
+    }
 
-        <div id="mfa-loading" class="hidden flex justify-center mt-4">
-          <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-primary"></div>
-        </div>
-        <br>
+    button[type="submit"] {
+      width: 100%;
+      background: var(--color-navy);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
 
-        <button
-          class="bg-primary w-full text-white p-2 rounded"
-          type="submit"
-          >
-          Verificar
-        </button>
+    button[type="submit"]:hover {
+      background: var(--color-navy-mid);
+    }
 
-      </form>
+    button[type="submit"]:active {
+      transform: scale(0.98);
+    }
 
-      <p class="text-center text-sm text-gray-600 mt-4">
-      Esqueceu a senha?
-      <a href="/recover" class="text-primary font-medium hover:underline">
-        Recuperar sua conta
-      </a>
-      </p>
-      <p class="text-center text-sm text-gray-600 mt-4">
-      Não possui conta?
-      <a href="/register" class="text-primary font-medium hover:underline">
-        Registrar-se
-      </a>
-      </p>
+    #login-loading,
+    #mfa-loading {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    #login-loading.hidden,
+    #mfa-loading.hidden {
+      display: none;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--color-navy-light);
+      border-top-color: var(--color-navy);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .login-divider {
+      border: none;
+      border-top: 1px solid #e4ecf5;
+      margin: 1rem 0 0.5rem;
+    }
+
+    .login-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .login-links p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
+    .login-links a {
+      color: var(--color-navy-mid);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .login-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+
+  <div class="login-card">
+    <h1>Login</h1>
+
+    <!-- LOGIN FORM -->
+    <form id="login-form">
+      <input id="email" placeholder="Email" type="email">
+      <input id="password" placeholder="Senha" type="password">
+
+      <div id="login-loading" class="hidden">
+        <div class="spinner"></div>
+      </div>
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <hr class="login-divider">
+
+    <div class="login-links">
+      <p>Esqueceu a senha? <a href="/recover">Recuperar sua conta</a></p>
+      <p>Não possui conta? <a href="/register">Registrar-se</a></p>
     </div>
-    <script th:src="@{/js/login.js}"> </script>
-  </main>
+  </div>
 
+  <script th:src="@{/js/login.js}"></script>
+</main>
 </body>
 </html>

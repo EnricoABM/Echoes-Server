@@ -1,30 +1,176 @@
 <!DOCTYPE html>
 
 <html th:replace="layout :: layout('Dashboard', ~{::body})">
+<head>
+  <meta http-equiv="refresh" content="5">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    main {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #1f2937;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Área de filtros */
+    .filters {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .filters select,
+    .filters input {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .filters select {
+      background: #ffffff;
+      cursor: pointer;
+    }
+
+    .filters input {
+      flex: 1;
+    }
+
+    .filters select:focus,
+    .filters input:focus {
+      border-color: #0b1f3a;
+    }
+
+    .table-container {
+      width: 100%;
+      max-width: 1000px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    thead {
+      background: #0b1f3a;
+    }
+
+    th {
+      padding: 12px;
+      font-size: 14px;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    td {
+      padding: 12px;
+      font-size: 14px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    tr:hover {
+      background: #f1f5f9;
+    }
+
+    .success {
+      color: #16a34a;
+      font-weight: bold;
+    }
+
+    .error {
+      color: #dc2626;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
 <body>
 
-  <div class="flex h-full">
+  <div class="container">
 
     <!-- Sidebar -->
-
     <div th:replace="fragments/sidebar :: sidebar"></div>
 
+    <main>
 
-    <main class="flex-1 p-10">
+      <h1>Logs de Segurança</h1>
 
-      <h1 class="text-3xl font-bold text-gray-800">
-        Bem-vindo ao Dashboard
-      </h1>
+      <!-- Filtros -->
+      <div class="filters">
+        <select>
+          <option value="">Filtrar por</option>
+          <option value="userId">Id Usuário</option>
+          <option value="action">Ação</option>
+          <option value="entity">Entidade</option>
+          <option value="status">Status</option>
+          <option value="ip">IP</option>
+        </select>
 
-      <p class="mt-4 text-gray-600">
-        Área principal do sistema.
-      </p>
+        <input type="text" placeholder="Pesquisar...">
+      </div>
+
+      <div class="table-container">
+        <table>
+          
+          <thead>
+            <tr>
+              <th>Id Usuário</th>
+              <th>Ação</th>
+              <th>Entidade</th>
+              <th>Status</th>
+              <th>Detalhes</th>
+              <th>IP</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr th:each="log : ${logs}">
+              <td th:text="${log.userId}"></td>
+              <td th:text="${log.action}"></td>
+              <td th:text="${log.entity}"></td>
+              <td th:text="${log.status}"
+                  th:classappend="${log.status == 'SUCCESS'} ? ' success' : ' error'">
+              </td>
+              <td th:text="${log.details}"></td>
+              <td th:text="${log.ip}"></td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
 
     </main>
 
   </div>
-
-  <script th:src="@{/js/dashboard.js}"></script>
 
 </body>
 </html>
