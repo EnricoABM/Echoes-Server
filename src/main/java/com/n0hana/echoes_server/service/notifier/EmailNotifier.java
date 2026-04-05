@@ -1,6 +1,7 @@
 package com.n0hana.echoes_server.service.notifier;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 */
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "twofactor.provider", havingValue = "email")
 public class EmailNotifier implements TwoFactorNotifier {
 
     private final JavaMailSender javaMailSender;

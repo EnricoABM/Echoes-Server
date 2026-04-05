@@ -17,8 +17,7 @@ import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.logs.Auditable;
-import com.n0hana.echoes_server.service.notifier.EmailNotifier;
-import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
+import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 
 import jakarta.servlet.http.Cookie;
@@ -35,7 +34,7 @@ public class AuthService {
     private final LoginAttemptService loginAttemptService;
     private final AuthenticationManager authenticationManager;
     private final TwoFactorService twoFactorService;
-    private final EmailNotifier notifier;
+    private final TwoFactorNotifier notifier;
     private final InMemoryTwoFactorRepository twoFactorRepository;
     private final JwtTokenService tokenService;
 
