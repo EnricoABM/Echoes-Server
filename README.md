@@ -36,6 +36,19 @@ export DATABASE_USER=user
 export DATABASE_PASSWORD=password
 ```
 
+### 2.1 Configuração do HTTPS
+Para executar o sistema, deve-se configurar e prover uma chave TLS e associa-los ao ssitema por meio das variáveis `SSL_KEYSTORE_PATH` e `SSL_KEYSTORE_PASSWORD`.
+* Windows
+```bash
+set SSL_KEYSTORE_PATH=C:\keystore.p12
+set SSL_KEYSTORE_PASSWORD=senha
+```
+* Linux / Mac
+```bash
+export SSL_KEYSTORE_PATH=/etc/ssl/echoes/keystore.p12
+export SSL_KEYSTORE_PASSWORD=senha
+```
+
 ### 3. Configuração das demais variáveis
 Além do banco de dados, é necessário configurar `JWT_SECRET` para emissão de tokens, e `API_KEY` para o serviço de notificação via serviço de e-mail. 
 * Windows
