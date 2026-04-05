@@ -17,6 +17,8 @@ import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.BlackListService;
 import com.n0hana.echoes_server.service.auth.JwtTokenService;
 import com.n0hana.echoes_server.service.logs.Auditable;
+import com.n0hana.echoes_server.service.notifier.EmailNotifier;
+import com.n0hana.echoes_server.service.notifier.LoggerNotifier;
 import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.password.InMemoryPasswordCodeRepository.CodeType;
 import com.n0hana.echoes_server.service.password.InMemoryPasswordCodeRepository.PasswordCode;
@@ -27,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PasswordResetService {
 
-    private final TwoFactorNotifier emailNotifier;
+    private final EmailNotifier emailNotifier;
     private final UserRepository userRepository;
     private final SecureRandom random = new SecureRandom();
     private final InMemoryPasswordCodeRepository codeRepository;
