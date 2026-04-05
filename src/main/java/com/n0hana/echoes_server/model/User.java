@@ -24,8 +24,8 @@ import lombok.Setter;
 
 @Entity
 @Table
-@Getter
 @Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class User implements UserDetails {
@@ -81,6 +81,11 @@ public class User implements UserDetails {
     @Override
     public boolean isAccountNonLocked() {
         return lockUntil == null || lockUntil.isBefore(LocalDateTime.now());
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
 }
