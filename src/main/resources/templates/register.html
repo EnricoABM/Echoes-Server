@@ -1,230 +1,106 @@
 <!DOCTYPE html>
-<html th:replace="layout :: layout('Registrar', ~{::body})">
+<html th:replace="fragments/layout :: layout('Registro', ~{::body})">
 <body>
-<main class="register-page">
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@600&display=swap');
+  <main class="flex items-center justify-center h-screen">
+    <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
 
-    :root {
-      --color-navy:        #0a1e42;
-      --color-navy-mid:    #185fa5;
-      --color-navy-light:  #cdd8ea;
-      --color-bg:          #f0f4f8;
-      --color-surface:     #ffffff;
-      --color-input-bg:    #f5f8fc;
-      --color-text:        #0a1e42;
-      --color-text-muted:  #5f7a99;
-      --color-placeholder: #8fa3c0;
-      --color-focus-ring:  rgba(24, 95, 165, 0.12);
-    }
+      <h1 class="text-2xl font-bold text-center text-primary mb-6">
+        Criar conta
+      </h1>
 
-    .register-page {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background-color: var(--color-bg);
-    }
+      <!-- REGISTRO -->
 
-    .register-card {
-      background: var(--color-surface);
-      padding: 2.5rem 2rem;
-      border-radius: 16px;
-      border: 0.5px solid var(--color-navy-light);
-      box-shadow: 0 4px 32px rgba(10, 30, 66, 0.10);
-      width: 100%;
-      max-width: 420px;
-      animation: fade-up 0.45s ease both;
-    }
+      <form id="registerForm" class="space-y-4">
 
-    @keyframes fade-up {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nome</label>
+          <input type="text" id="name" required
+          class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"/>
+        </div>
 
-    .register-card h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-weight: 600;
-      color: var(--color-navy);
-      text-align: center;
-      margin-bottom: 1.75rem;
-      letter-spacing: -0.3px;
-    }
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" id="email" required
+          class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"/>
+        </div>
 
-    #registerForm,
-    #mfaForm {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Senha</label>
+          <input
+            type="password"
+            id="password"
+            required
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+            title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
+            class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"/>
+        </div>
 
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Cargo</label>
+          <select id="role"
+            class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+            <option value="STUDENT">Estudante</option>
+            <option value="TEACHER">Professor</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
 
-    .field label {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-text-muted);
-    }
+        <div id="register-loading" class="hidden flex justify-center mt-4">
+          <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-primary"></div>
+        </div>
+        <br>
 
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    select {
-      width: 100%;
-      background: var(--color-input-bg);
-      border: 1px solid var(--color-navy-light);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      color: var(--color-text);
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      box-sizing: border-box;
-      appearance: none;
-    }
+        <button
+          type="submit"
+          class="w-full bg-primary text-white py-2 rounded-lg hover:bg-blue-900 transition">
+          Registrar </button>
 
-    input::placeholder { color: var(--color-placeholder); }
+      </form>
 
-    input:focus,
-    select:focus {
-      border-color: var(--color-navy-mid);
-      background: var(--color-surface);
-      box-shadow: 0 0 0 3px var(--color-focus-ring);
-    }
+      <!-- 2FA -->
 
-    input:invalid:not(:placeholder-shown) {
-      border-color: #e24b4a;
-      box-shadow: 0 0 0 3px rgba(226, 75, 74, 0.12);
-    }
+      <form id="mfaForm" class="hidden mt-6">
 
-    button[type="submit"] {
-      width: 100%;
-      background: var(--color-navy);
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      padding: 11px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.1s ease;
-    }
+        <label class="block text-sm font-medium text-gray-700">
+          Código de verificação
+        </label>
 
-    button[type="submit"]:hover { background: var(--color-navy-mid); }
-    button[type="submit"]:active { transform: scale(0.98); }
+        <input id="code"
+        type="text"
+        placeholder="Digite o código"
+        class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+        minlength="6"
+        inputmode="numeric"
+        pattern="\d{6}"
+        title="Digite um código de 6 dígitos"
+        required
+        />
 
-    #register-loading,
-    #mfa-loading {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-    }
+        <div id="mfa-loading" class="hidden flex justify-center mt-4">
+          <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-primary"></div>
+        </div>
+        <br>
 
-    #register-loading.hidden,
-    #mfa-loading.hidden { display: none; }
+        <button
+          type="submit"
+          class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-blue-900 transition">
+          Confirmar código </button>
 
-    .spinner {
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--color-navy-light);
-      border-top-color: var(--color-navy);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
+      </form>
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+      <p class="text-center text-sm text-gray-600 mt-4">
+      Já possui conta?
+      <a href="/" class="text-primary font-medium hover:underline">
+        Entrar
+      </a>
+      </p>
 
-    .register-links {
-      text-align: center;
-      margin-top: 1.25rem;
-    }
-
-    .register-links p {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      color: var(--color-text-muted);
-      margin: 0;
-    }
-
-    .register-links a {
-      color: var(--color-navy-mid);
-      font-weight: 500;
-      text-decoration: none;
-    }
-
-    .register-links a:hover { text-decoration: underline; }
-  </style>
-
-  <div class="register-card">
-    <h1>Criar conta</h1>
-
-    <!-- REGISTRO -->
-    <form id="registerForm">
-      <div class="field">
-        <label>Nome</label>
-        <input type="text" id="name" placeholder="Seu nome" required>
-      </div>
-
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="email" placeholder="Seu email" required>
-      </div>
-
-      <div class="field">
-        <label>Senha</label>
-        <input type="password" id="password" placeholder="Sua senha" required
-          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
-          title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo">
-      </div>
-
-      <div class="field">
-        <label>Cargo</label>
-        <select id="role">
-          <option value="STUDENT">Estudante</option>
-          <option value="TEACHER">Professor</option>
-          <option value="ADMIN">Admin</option>
-        </select>
-      </div>
-
-      <div id="register-loading" class="hidden">
-        <div class="spinner"></div>
-      </div>
-
-      <button type="submit">Registrar</button>
-    </form>
-
-    <!-- 2FA -->
-    <form id="mfaForm" class="hidden" style="margin-top: 1.5rem;">
-      <div class="field">
-        <label>Código de verificação</label>
-        <input id="code" type="text" placeholder="Digite o código"
-          minlength="6" inputmode="numeric" pattern="\d{6}"
-          title="Digite um código de 6 dígitos" required>
-      </div>
-
-      <div id="mfa-loading" class="hidden">
-        <div class="spinner"></div>
-      </div>
-
-      <button type="submit">Confirmar código</button>
-    </form>
-
-    <div class="register-links">
-      <p>Já possui conta? <a href="/">Entrar</a></p>
     </div>
-  </div>
 
-  <script th:src="@{/js/register.js}"></script>
-</main>
+    <script th:src="@{/js/register.js}"> </script>
+  </main>
+
 </body>
 </html>
+

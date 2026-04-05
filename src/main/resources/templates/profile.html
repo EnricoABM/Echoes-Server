@@ -1,268 +1,106 @@
+
 <!DOCTYPE html>
-<html th:replace="layout :: layout('Perfil', ~{::body})">
+
+<html th:replace="fragments/layout :: layout('Perfil', ~{::body})">
+
 <body>
-<div class="profile-wrapper">
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@600&display=swap');
-
-    :root {
-      --color-navy:        #0a1e42;
-      --color-navy-mid:    #185fa5;
-      --color-navy-light:  #cdd8ea;
-      --color-bg:          #f0f4f8;
-      --color-surface:     #ffffff;
-      --color-input-bg:    #f5f8fc;
-      --color-text:        #0a1e42;
-      --color-text-muted:  #5f7a99;
-      --color-placeholder: #8fa3c0;
-      --color-focus-ring:  rgba(24, 95, 165, 0.12);
-      --color-success:     #1d9e75;
-      --color-success-mid: #0f6e56;
-    }
-
-    .profile-wrapper {
-      display: flex;
-      height: 100%;
-      background-color: var(--color-bg);
-    }
-
-    .profile-main {
-      flex: 1;
-      padding: 2.5rem;
-      font-family: 'DM Sans', sans-serif;
-    }
-
-    .profile-main h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 28px;
-      font-weight: 600;
-      color: var(--color-navy);
-      margin-bottom: 2rem;
-      letter-spacing: -0.3px;
-    }
-
-    /* ── Cards ───────────────────────────────────────── */
-    .profile-card {
-      background: var(--color-surface);
-      border-radius: 16px;
-      border: 0.5px solid var(--color-navy-light);
-      box-shadow: 0 4px 32px rgba(10, 30, 66, 0.08);
-      padding: 1.75rem;
-      width: 100%;
-      max-width: 480px;
-      margin-bottom: 1.5rem;
-      animation: fade-up 0.45s ease both;
-    }
-
-    @keyframes fade-up {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .profile-card h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--color-navy);
-      margin-bottom: 1.25rem;
-      letter-spacing: -0.2px;
-    }
-
-    /* ── Info do usuário ─────────────────────────────── */
-    .profile-info-item {
-      margin-bottom: 1rem;
-    }
-
-    .profile-info-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .profile-info-item .info-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--color-text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 2px;
-    }
-
-    .profile-info-item .info-value {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--color-navy);
-    }
-
-    /* ── Fields ──────────────────────────────────────── */
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-bottom: 14px;
-    }
-
-    .field label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-text-muted);
-    }
-
-    input[type="password"] {
-      width: 100%;
-      background: var(--color-input-bg);
-      border: 1px solid var(--color-navy-light);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      color: var(--color-text);
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-      box-sizing: border-box;
-    }
-
-    input[type="password"]:focus {
-      border-color: var(--color-navy-mid);
-      background: var(--color-surface);
-      box-shadow: 0 0 0 3px var(--color-focus-ring);
-    }
-
-    input:invalid:not(:placeholder-shown) {
-      border-color: #e24b4a;
-      box-shadow: 0 0 0 3px rgba(226, 75, 74, 0.12);
-    }
-
-    /* ── Botões ──────────────────────────────────────── */
-    .btn-primary {
-      background: var(--color-navy);
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.1s ease;
-    }
-
-    .btn-primary:hover { background: var(--color-navy-mid); }
-    .btn-primary:active { transform: scale(0.98); }
-
-    .btn-success {
-      background: var(--color-success);
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.1s ease;
-    }
-
-    .btn-success:hover { background: var(--color-success-mid); }
-    .btn-success:active { transform: scale(0.98); }
-
-    /* ── Spinners ────────────────────────────────────── */
-    #validate-loading,
-    #change-loading {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      margin-bottom: 10px;
-    }
-
-    #validate-loading.hidden,
-    #change-loading.hidden { display: none; }
-
-    .spinner {
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--color-navy-light);
-      border-top-color: var(--color-navy);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Seção nova senha ────────────────────────────── */
-    #newPasswordSection {
-      margin-top: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
-    #newPasswordSection.hidden { display: none; }
-  </style>
+<div class="flex h-full">
 
   <div th:replace="fragments/sidebar :: sidebar"></div>
 
-  <main class="profile-main">
-    <h1>Meu Perfil</h1>
+    <main class="flex-1 p-10">
 
-    <!-- Info do usuário -->
-    <div class="profile-card">
-      <div class="profile-info-item">
-        <p class="info-label">Nome</p>
-        <p class="info-value" th:text="${user.name}">Nome do Usuário</p>
-      </div>
-      <div class="profile-info-item">
-        <p class="info-label">Email</p>
-        <p class="info-value" th:text="${user.email}">email@exemplo.com</p>
-      </div>
-    </div>
+      <h1 class="text-3xl font-bold text-gray-800">
+        Meu Perfil
+      </h1>
 
-    <!-- Alterar senha -->
-    <div class="profile-card">
-      <h2>Alterar senha</h2>
+      <div class="mt-8 bg-white shadow rounded-lg p-6 w-full max-w-lg">
 
-      <div class="field">
-        <label>Senha atual</label>
-        <input type="password" id="currentPassword" placeholder="Digite sua senha atual">
-      </div>
-
-      <div id="validate-loading" class="hidden">
-        <div class="spinner"></div>
-      </div>
-
-      <button id="validate-btn" class="btn-primary">Validar senha</button>
-
-      <!-- Nova senha -->
-      <form id="newPasswordSection" class="hidden">
-        <div class="field" style="margin-top: 1.5rem;">
-          <label>Nova senha</label>
-          <input type="password" id="newPassword" placeholder="Digite a nova senha"
-            required
-            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
-            title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo">
+        <div class="mb-4">
+          <p class="text-sm text-gray-500">Nome</p>
+          <p class="text-lg font-semibold text-gray-800"
+             th:text="${user.name}">
+            Nome do Usuário
+          </p>
         </div>
 
-        <div class="field">
-          <label>Confirme a nova senha</label>
-          <input type="password" id="confirmPassword" placeholder="Confirme a nova senha"
-            required
-            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
-            title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo">
+        <div>
+          <p class="text-sm text-gray-500">Email</p>
+          <p class="text-lg font-semibold text-gray-800"
+             th:text="${user.email}">
+            email@exemplo.com
+          </p>
         </div>
 
-        <div id="change-loading" class="hidden">
-          <div class="spinner"></div>
-        </div>
+      </div>
 
-        <button type="submit" class="btn-success">Alterar senha</button>
-      </form>
-    </div>
-  </main>
+      <div class="mt-8 bg-white shadow rounded-lg p-6 w-full max-w-lg">
 
-</div>
+          <h2 class="text-xl font-bold text-gray-800 mb-4">
+            Alterar senha
+          </h2>
 
-<script th:src="@{/js/dashboard.js}"></script>
-<script th:src="@{/js/password.js}"></script>
+          <!-- Senha atual -->
+          <div class="mb-4">
+            <label class="text-sm text-gray-600">Senha atual</label>
+            <input type="password" id="currentPassword"
+                   class="w-full mt-1 p-2 border rounded" />
+          </div>
+
+          <div id="validate-loading" class="hidden flex justify-center mt-4">
+            <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-primary"></div>
+          </div>
+          <br>
+
+          <button id="validate-btn"
+                  class="bg-primary text-white px-4 py-2 rounded">
+            Validar senha
+          </button>
+
+          <!-- Nova senha (inicialmente escondido) -->
+          <form id="newPasswordSection" class="mt-6 hidden">
+
+            <div class="mb-4">
+              <label class="text-sm text-gray-600">Nova senha</label>
+              <input type="password" id="newPassword"
+                     class="w-full mt-1 p-2 border rounded"
+                     required
+                     pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+                     title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
+                     />
+            </div>
+
+            <div class="mb-4">
+              <label class="text-sm text-gray-600">Confirme a nova senha</label>
+              <input type="password" id="confirmPassword"
+                     class="w-full mt-1 p-2 border rounded"
+                     required
+                     pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$"
+                     title="Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo"
+                     />
+            </div>
+
+            <div id="change-loading" class="hidden flex justify-center mt-4">
+              <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-primary"></div>
+            </div>
+            <br>
+
+            <button type="submit"
+                    class="bg-green-600 text-white px-4 py-2 rounded">
+              Alterar senha
+            </button>
+
+          </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script th:src="@{/js/dashboard.js}"></script>
+  <script th:src="@{/js/password.js}"></script>
+
 </body>
 </html>
