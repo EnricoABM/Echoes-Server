@@ -1,98 +1,27 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
+<html
+  th:fragment="layout(title, content)"
+  lang="pt-br">
+  <head>
     <meta charset="UTF-8">
-    <title>Layout</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title}">App</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#2e4c9b"
+          }
         }
-
-        body {
-            display: flex;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            background: #ffffff;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background: #0b1f3a;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header */
-        .header {
-            padding: 20px;
-            font-weight: bold;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            background: #0a1a2f;
-        }
-
-        /* Navegação */
-        .nav {
-            flex: 1;
-            padding: 20px;
-        }
-
-        .nav ul {
-            list-style: none;
-        }
-
-        .nav li {
-            margin: 15px 0;
-        }
-
-        .nav button {
-            width: 100%;
-            background: transparent;
-            color: #ffffff;
-            border: none;
-            text-align: left;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .nav button:hover {
-            background: #163a63;
-        }
-
-        /* Main */
-        .main {
-            flex: 1;
-            background: #ffffff;
-            color: #0b1f3a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="sidebar">
-        <div class="header">Usuário</div>
-
-        <div class="nav">
-            <ul>
-                <li><button type="button">Logs de Segurança</button></li>
-                <li><button type="button">Dados Usuários</button></li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="main">
-        
-    </div>
-
-</body>
+      }
+    }
+    </script>
+  </head>
+  <body class="bg-gray-100 h-screen">
+    <div th:replace="${content}"></div>
+  </body>
 </html>
