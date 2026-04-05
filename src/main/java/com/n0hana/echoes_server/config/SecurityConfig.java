@@ -30,7 +30,12 @@ public class SecurityConfig {
 
         return http
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(session ->
+            .headers(headers -> 
+              headers.httpStrictTransportSecurity(hsts -> 
+                  hsts.includeSubDomains(true)
+                      .maxAgeInSeconds(31536000)
+            ))
+              .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/register", "/recover", "/css/**", "/js/**").permitAll()
