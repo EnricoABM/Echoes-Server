@@ -9,6 +9,7 @@ import com.n0hana.echoes_server.dto.RegisterRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
 import com.n0hana.echoes_server.model.User;
+import com.n0hana.echoes_server.model.UserRole;
 import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.repository.PendingRegisterRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
@@ -28,8 +29,20 @@ public class RegisterService {
     private final PasswordEncoder passwordEncoder;
     private final PendingRegisterRepository registerRepository;
 
+    public String registerRequestTeacher(RegisterRequestDTO dto) {
+        return registerRequest(dto, UserRole.TEACHER);
+    }
+
+    public String registerRequestStudent(RegisterRequestDTO dto) {
+        return registerRequest(dto, UserRole.STUDENT);
+    }
+
+    public String registerRequestAdmin(RegisterRequestDTO dto) {
+        return registerRequest(dto, UserRole.ADMIN);
+    }
+
     @Auditable(action = "Envio dos dados para registro", entity = "REGISTER")
-    public String registerRequest(RegisterRequestDTO dto) {
+    private String registerRequest(RegisterRequestDTO dto, UserRole role) {
         // Verifica se o usuário já existe
         
         if (userRepository.findUserByEmail(dto.email()).isPresent())
@@ -54,7 +67,7 @@ public class RegisterService {
             dto.name(),
             dto.email(),
             password,
-            dto.role()
+            role
         );
 
         // Salva os dados do registro

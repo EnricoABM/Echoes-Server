@@ -1,6 +1,7 @@
 package com.n0hana.echoes_server.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,15 +67,39 @@ public class AuthController {
         }
     }
 
+
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequestDTO dto) {
         try {
-            registerService.registerRequest(dto);
+            registerService.registerRequestTeacher(dto);
             return ResponseEntity.ok().build();
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/register/student")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<Void> registerStudent(@RequestBody @Valid RegisterRequestDTO dto) {
+        try {
+            registerService.registerRequestStudent(dto);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/register/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> registerAdmin(@RequestBody @Valid RegisterRequestDTO dto) {
+        try {
+            registerService.registerRequestStudent(dto);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
 
     @PostMapping("/register/2fa")
     public ResponseEntity<?> registerMFA(@RequestBody VerifyDTO dto) {
