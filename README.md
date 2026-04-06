@@ -10,7 +10,6 @@ O projeto visa implementar mecanismos de autenticação de usuários, gestão de
 * Spring Security
 * JSON Web Token
 * MySQL
-* Mailgun
 
 ## Como Executar
 
