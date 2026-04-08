@@ -21,8 +21,10 @@ WORKDIR /app
 # Copia o jar gerado da etapa anterior
 COPY --from=builder /app/target/*.jar app.jar
 
+ENV SERVER_PORT=443
+
 # Expõe a porta padrão
-EXPOSE 8080
+EXPOSE 443
 
 # Comando de execução
 ENTRYPOINT ["java", "-jar", "app.jar"]

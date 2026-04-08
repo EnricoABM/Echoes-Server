@@ -25,6 +25,8 @@ services:
     build: .
     container_name: echoes_app
     restart: always
+    args:
+      KEYSTORE_PATH: ${KEYSTORE_PATH}
     depends_on:
       - db
       - redis
@@ -32,6 +34,7 @@ services:
       - "443:443" 
     volumes:
       - ./certs:/app/certs 
+      - ./keystore.p12:/app/keystore.p12
     environment:
       
       # Mysql
@@ -45,7 +48,7 @@ services:
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       # HTTPS 
-      SERVER_SSL_KEY_STORE: ${SSL_KEYSTORE_PATH}
+      SERVER_SSL_KEY_STORE: /app/keystore.p12
       SERVER_SSL_KEY_STORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD}
       SERVER_SSL_KEY_ALIAS: ${SSL_ALIAS}
       SERVER_SSL_KEY_STORE_TYPE: ${SSL_KEYSTORE_TYPE}
