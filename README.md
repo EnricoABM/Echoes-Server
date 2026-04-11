@@ -2,14 +2,15 @@
 
 Servidor de autenticação responsável pela gestão de credenciais e acesso de usuário para uma aplicação mobile e sistema IoT. 
 
-O projeto visa implementar mecanismos de autenticação de usuários, gestão de credenciais e emissão de tokens de acesso, seguindo boas normas e conformidade com a Lei Geral de Proteção de Dados (LGPD). 
+O projeto implementa mecanismos de autenticação, autorização e emissão de tokens de acesso, seguindo boas práticas de segurança e conformidade com a Lei Geral de Proteção de Dados (LGPD).
 
 ## Tecnologias Utilizadas
-* Java
+* Java 21
 * Spring Boot
 * Spring Security
-* JSON Web Token
+* JSON Web Token (JWT)
 * MySQL
+* Redis (rate limiting e armazenamento temporário)
 
 ## Como Executar
 
@@ -18,16 +19,19 @@ Dependências do Projeto
 * Java 21 ou superior
 * Maven
 * MySQL
+* Redis (opcional, recomendado)
 * Variáveis de ambiente configuradas
 
 ### 2. Configuração do Banco de Dados
-Para execução do sistema, deve-se configurar um usuário e um banco de dados e associa-los ao sistema por meio das variáveis `DATABASE_URL`, `DATABASE_USER` e `DATABASE_PASSWORD`.
+Para execução do sistema, deve-se configurar um usuário e um banco de dados e associá-los ao sistema por meio das variáveis `DATABASE_URL`, `DATABASE_USER` e `DATABASE_PASSWORD`.
+
 * Windows
 ```bash
 set DATABASE_URL=jdbc:mysql://address:3306/database
 set DATABASE_USER=user
 set DATABASE_PASSWORD=password
 ```
+
 * Linux / Mac
 ```bash
 export DATABASE_URL=jdbc:mysql://address:3306/database
@@ -36,29 +40,41 @@ export DATABASE_PASSWORD=password
 ```
 
 ### 2.1 Configuração do HTTPS
-Para executar o sistema, deve-se configurar e prover uma chave TLS e associa-los ao ssitema por meio das variáveis `SSL_KEYSTORE_PATH` e `SSL_KEYSTORE_PASSWORD`.
+Para executar o sistema de forma segura, configure uma chave TLS por meio das variáveis `SSL_KEYSTORE_PATH` e `SSL_KEYSTORE_PASSWORD`.
+
 * Windows
 ```bash
 set SSL_KEYSTORE_PATH=C:\keystore.p12
-set SSL_KEYSTORE_PASSWORD=senha
+set SSL_KEYSTORE_PASSWORD=senha_forte
 ```
+
 * Linux / Mac
 ```bash
 export SSL_KEYSTORE_PATH=/etc/ssl/echoes/keystore.p12
-export SSL_KEYSTORE_PASSWORD=senha
+export SSL_KEYSTORE_PASSWORD=senha_forte
 ```
 
 ### 3. Configuração das demais variáveis
-Além do banco de dados, é necessário configurar `JWT_SECRET` para emissão de tokens, e `API_KEY` para o serviço de notificação via serviço de e-mail. 
+Além do banco de dados, é necessário configurar:
+
+* `JWT_SECRET` → emissão de tokens  
+* `API_KEY` → serviço de notificação  
+* `MAIL_USER` e `MAIL_PASS` → envio de e-mail  
+
 * Windows
 ```bash
 set JWT_SECRET=my-secret
 set API_KEY=api-key
+set MAIL_USER=email
+set MAIL_PASS=senha
 ```
+
 * Linux / Mac
 ```bash
 export JWT_SECRET=my-secret
 export API_KEY=api-key
+export MAIL_USER=email
+export MAIL_PASS=senha
 ```
 
 ## Executando a Aplicação
@@ -76,6 +92,11 @@ cd Echoes-Server
 
 A aplicação executa por padrão em:
 ```bash
+https://localhost:8443
+```
+
+Caso HTTPS não esteja configurado:
+```bash
 http://localhost:8080
 ```
 
@@ -85,7 +106,7 @@ http://localhost:8080
 
 ### Login
 ```request
-POST api/auth/login
+POST /api/auth/login
 ```
 ```json
 {
@@ -96,7 +117,7 @@ POST api/auth/login
 
 ### MFA
 ```request
-POST api/auth/login/2fa
+POST /api/auth/login/2fa
 ```
 ```json
 {
@@ -107,23 +128,27 @@ POST api/auth/login/2fa
 
 ### Logout
 ```request
-GET api/auth/logout
+GET /api/auth/logout
+```
 Headers:
-    Authorization: Bearer $token
+```
+Authorization: Bearer $token
 ```
 
 ### Validar Token
 ```request
-GET api/auth/validate-token
-Headers: 
-    Authorization: Bearer $token
+GET /api/auth/validate-token
+```
+Headers:
+```
+Authorization: Bearer $token
 ```
 
 ## Cadastro
 
 ### Register
 ```request
-POST api/auth/register
+POST /api/auth/register
 ```
 ```json
 {
@@ -135,7 +160,7 @@ POST api/auth/register
 
 ### Validar E-mail
 ```request
-POST api/auth/register/2fa
+POST /api/auth/register/2fa
 ```
 ```json
 {
@@ -148,7 +173,37 @@ POST api/auth/register/2fa
 
 ### Informação do Usuário
 ```request
-GET api/users/me
-Headers:
-    Authorization: Bearer $token
+GET /api/users/me
 ```
+Headers:
+```
+Authorization: Bearer $token
+```
+
+# Segurança
+
+O sistema implementa:
+
+* Hash seguro de senha (ex: BCrypt)
+* Autenticação via JWT
+* Autenticação multifator (MFA) por e-mail
+* Rate limiting (proteção contra brute force)
+* Suporte a HTTPS
+
+# Observações
+
+* Não versionar credenciais no código
+* Utilizar variáveis de ambiente (.env)
+* Utilizar HTTPS em produção
+* Evitar exposição de tokens em múltiplos locais
+* Desativar logs sensíveis em produção
+
+# Próximos Passos
+
+* Controle de sessão com refresh token
+* Bloqueio de login por tentativas
+* Auditoria completa
+* Endpoint de logs
+* Integração com dispositivos IoT
+* CRUD de cenários clínicos
+* Testes automatizados
