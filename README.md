@@ -207,3 +207,4 @@ O sistema implementa:
 * Integração com dispositivos IoT
 * CRUD de cenários clínicos
 * Testes automatizados
+ 
