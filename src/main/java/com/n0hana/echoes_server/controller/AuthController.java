@@ -100,7 +100,6 @@ public class AuthController {
         }
     }
     
-
     @PostMapping("/register/2fa")
     public ResponseEntity<?> registerMFA(@RequestBody VerifyDTO dto) {
         try {

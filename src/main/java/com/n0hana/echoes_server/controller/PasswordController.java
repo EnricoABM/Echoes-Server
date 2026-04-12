@@ -79,7 +79,6 @@ public class PasswordController {
         }
     }
 
-
     @PostMapping("/change")
     public ResponseEntity<Void> changePassword(@RequestBody @Valid PasswordDTO.ChangeRequest dto) {
         try {

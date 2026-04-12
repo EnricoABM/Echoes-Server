@@ -5,6 +5,7 @@ import java.time.Instant;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.n0hana.echoes_server.dto.PendingRegisterDTO;
 import com.n0hana.echoes_server.dto.RegisterRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
@@ -29,20 +30,20 @@ public class RegisterService {
     private final PasswordEncoder passwordEncoder;
     private final PendingRegisterRepository registerRepository;
 
-    public String registerRequestTeacher(RegisterRequestDTO dto) {
-        return registerRequest(dto, UserRole.TEACHER);
+    public void registerRequestTeacher(RegisterRequestDTO dto) {
+        registerRequest(dto, UserRole.TEACHER);
     }
 
-    public String registerRequestStudent(RegisterRequestDTO dto) {
-        return registerRequest(dto, UserRole.STUDENT);
+    public void registerRequestStudent(RegisterRequestDTO dto) {
+        registerRequest(dto, UserRole.STUDENT);
     }
 
-    public String registerRequestAdmin(RegisterRequestDTO dto) {
-        return registerRequest(dto, UserRole.ADMIN);
+    public void registerRequestAdmin(RegisterRequestDTO dto) {
+        registerRequest(dto, UserRole.ADMIN);
     }
 
     @Auditable(action = "Envio dos dados para registro", entity = "REGISTER")
-    private String registerRequest(RegisterRequestDTO dto, UserRole role) {
+    private void registerRequest(RegisterRequestDTO dto, UserRole role) {
         // Verifica se o usuário já existe
         
         if (userRepository.findUserByEmail(dto.email()).isPresent())
@@ -56,14 +57,8 @@ public class RegisterService {
             Instant.now().plusSeconds(300)
         );
         
-        /**==================================
-         *  CRIPTOGRAFIA DE SENHA
-         * ==================================
-         * Criptografia das senha do usuário
-         * usando algoritmo BCrypt.
-         */  
         String password = passwordEncoder.encode(dto.password());
-        dto = new RegisterRequestDTO(
+        PendingRegisterDTO pendingDTO = new PendingRegisterDTO(
             dto.name(),
             dto.email(),
             password,
@@ -72,7 +67,7 @@ public class RegisterService {
 
         // Salva os dados do registro
         registerRepository.save(
-            dto
+            pendingDTO
         );
 
         // Salva os dados do 2FA
@@ -80,7 +75,6 @@ public class RegisterService {
 
         // Envia o código
         notifier.send(token);
-        return "";
     }
 
     @Auditable(action = "Registro do usuário", entity = "REGISTER")
@@ -100,7 +94,7 @@ public class RegisterService {
 
 
         // Recupera os dados de registro e verifica se existem
-        RegisterRequestDTO registerDto = registerRepository.find(dto.email());
+        PendingRegisterDTO registerDto = registerRepository.find(dto.email());
         if (registerDto == null)
             throw new RuntimeException("Código Inválido");
 

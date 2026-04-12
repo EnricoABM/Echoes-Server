@@ -2,7 +2,7 @@ package com.n0hana.echoes_server.repository;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.n0hana.echoes_server.dto.RegisterRequestDTO;
+import com.n0hana.echoes_server.dto.PendingRegisterDTO;
 
 import java.util.concurrent.TimeUnit;
 
@@ -11,17 +11,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PendingRegisterRepository {
 
-    private final Cache<String, RegisterRequestDTO> cache =
+    private final Cache<String, PendingRegisterDTO> cache =
         Caffeine.newBuilder()
                 .expireAfterWrite(5, TimeUnit.MINUTES)
                 .maximumSize(1000)
                 .build();
 
-    public void save(RegisterRequestDTO dto) {
+    public void save(PendingRegisterDTO dto) {
         cache.put(dto.email(), dto);
     }
 
-    public RegisterRequestDTO find(String email) {
+    public PendingRegisterDTO find(String email) {
         return cache.getIfPresent(email);
     }
 
