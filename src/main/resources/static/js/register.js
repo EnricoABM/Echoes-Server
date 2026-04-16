@@ -10,6 +10,10 @@
   const password = document.getElementById("password");
   const confirmPassword = document.getElementById("confirmPassword");
 
+  /**
+   * Verifica se os campos de senha e confirmação são iguais.
+   * Caso sejam diferentes, define uma mensagem de erro personalizada.
+   */
   function validatePassword() {
     if (password.value !== confirmPassword.value) {
       confirmPassword.setCustomValidity("As senhas não coincidem");
@@ -18,10 +22,16 @@
     }
   }
 
-// Valida sempre que o usuário digitar em qualquer um dos dois campos
-password.onchange = validatePassword;
-confirmPassword.onkeyup = validatePassword;
+  // Valida sempre que o usuário alterar qualquer um dos campos de senha
+  password.onchange = validatePassword;
+  confirmPassword.onkeyup = validatePassword;
 
+  /**
+   * Atualiza o estado de carregamento da interface.
+   * Exibe ou oculta os indicadores visuais de loading.
+   *
+   * @param {boolean} newLoading Novo estado de carregamento
+   */
   function setLoading(newLoading) {
     loading = newLoading;
     if (loading) {
@@ -33,18 +43,27 @@ confirmPassword.onkeyup = validatePassword;
     }
   }
 
+  /**
+   * Evento disparado ao enviar o formulário de cadastro.
+   * Envia os dados para a API e, em caso de sucesso,
+   * exibe a etapa de verificação por código.
+   */
   registerForm.addEventListener('submit', async evt => {
     try {
       evt.preventDefault();
+
       if (loading)
         return;
+
       setLoading(true);
+
       const data = {
         name: document.getElementById("name").value,
         email: document.getElementById("email").value,
         password: document.getElementById("password").value,
         confirmPassword: document.getElementById("confirmPassword").value
       };
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
@@ -52,6 +71,7 @@ confirmPassword.onkeyup = validatePassword;
         },
         body: JSON.stringify(data)
       });
+
       if (res.ok) {
         emailCache = data.email;
 
@@ -71,15 +91,23 @@ confirmPassword.onkeyup = validatePassword;
     } finally {
       setLoading(false);
     }
-  })
+  });
 
+  /**
+   * Evento disparado ao enviar o formulário de MFA.
+   * Valida o código enviado ao email e finaliza o cadastro.
+   */
   mfaForm.addEventListener('submit', async evt => {
     try {
       evt.preventDefault();
+
       if (loading)
         return;
+
       setLoading(true);
+
       const code = document.getElementById("code").value;
+
       const res = await fetch("/api/auth/register/2fa", {
         method:"POST",
         headers:{
@@ -90,6 +118,7 @@ confirmPassword.onkeyup = validatePassword;
           code: code
         })
       });
+
       if (res.ok)
         window.location.href = '/';
       else
@@ -105,5 +134,5 @@ confirmPassword.onkeyup = validatePassword;
     } finally {
       setLoading(false);
     }
-  })
-})()
+  });
+})();

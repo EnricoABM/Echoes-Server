@@ -2,6 +2,13 @@
   const validateLoading = document.getElementById('validate-loading');
   const changeLoading = document.getElementById('change-loading');
   let loading = false;
+
+  /**
+   * Atualiza o estado de carregamento da interface.
+   * Exibe ou oculta os indicadores visuais de loading.
+   *
+   * @param {boolean} newLoading Novo estado de carregamento
+   */
   function setLoading(newLoading) {
     loading = newLoading;
     if (loading) {
@@ -16,6 +23,14 @@
   const newPasswordSection = document.getElementById('newPasswordSection');
 
   let resetToken = '';
+
+  /**
+   * Valida a senha atual do usuário antes de permitir a troca.
+   * Retorna um token temporário caso a validação seja bem-sucedida.
+   *
+   * @param {string} password Senha atual informada pelo usuário
+   * @returns {Promise<{ok: boolean, message: string}>}
+   */
   async function validatePassword(password) {
     const res = await fetch('/api/password/validate', {
       method: "POST",
@@ -23,8 +38,10 @@
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ password }),
-    })
+    });
+
     let message = '';
+
     if (!res.ok) {
       if (res.status === 429) {
         const retryAfter = res.headers.get('Retry-After');
@@ -32,18 +49,28 @@
       } else {
         message = 'Senha incorreta';
       }
+
       return {
         ok: false,
         message,
-      }
+      };
     }
+
     const data = await res.json();
     resetToken = data.token;
+
     return {
       ok: true,
       message,
     };
   }
+
+  /**
+   * Envia a nova senha para a API utilizando o token temporário.
+   *
+   * @param {string} password Nova senha do usuário
+   * @returns {Promise<{ok: boolean, message: string}>}
+   */
   async function changePassword(password) {
     const res = await fetch('/api/password/change', {
       method: "POST",
@@ -55,8 +82,10 @@
         newPassword: password,
         confirmPassword: password,
       }),
-    })
+    });
+
     let message = '';
+
     if (!res.ok) {
       if (res.status === 429) {
         const retryAfter = res.headers.get('Retry-After');
@@ -65,19 +94,27 @@
         message = 'Um erro ocorreu';
       }
     }
+
     return {
       ok: res.ok,
       message,
     };
   }
 
+  /**
+   * Evento disparado ao clicar no botão de validação.
+   * Verifica a senha atual e libera o formulário de nova senha.
+   */
   document.getElementById('validate-btn').addEventListener('click', async () => {
     try {
       if (loading)
         return;
+
       setLoading(true);
+
       const current = document.getElementById('currentPassword').value;
       const res = await validatePassword(current);
+
       if (!res.ok)
         return alert(res.message);
 
@@ -89,18 +126,29 @@
     } finally {
       setLoading(false);
     }
-  })
+  });
+
+  /**
+   * Evento disparado ao enviar o formulário de nova senha.
+   * Verifica se as senhas coincidem e envia a alteração para a API.
+   */
   newPasswordSection.addEventListener('submit', async evt => {
     try {
       evt.preventDefault();
+
       if (loading)
         return;
+
       setLoading(true);
+
       const newPass = document.getElementById('newPassword').value;
       const confirmPass = document.getElementById('confirmPassword').value;
+
       if (newPass !== confirmPass)
         return alert('As senhas não são equivalentes');
+
       const res = await changePassword(newPass);
+
       if (!res.ok)
         alert(res.message);
     } catch(err) {
@@ -110,13 +158,19 @@
       setLoading(false);
       window.location.reload();
     }
-  })
+  });
 
+  /**
+   * Inicia um temporizador baseado na expiração do token.
+   * Quando expirar, remove o token e oculta o formulário.
+   *
+   * @param {string} token Token JWT temporário
+   */
   function startTokenWatcher(token) {
     const decoded = parseJwt(token);
     const now = Math.floor(Date.now() / 1000);
 
-    const timeLeft = (decoded.exp - now) * 1000; // ms
+    const timeLeft = (decoded.exp - now) * 1000;
 
     setTimeout(() => {
       resetToken = null;
@@ -125,9 +179,17 @@
       alert("Sessão expirada. Valide sua senha novamente.");
     }, timeLeft);
   }
+
+  /**
+   * Decodifica um token JWT e retorna seu conteúdo em objeto.
+   *
+   * @param {string} token Token JWT
+   * @returns {object}
+   */
   function parseJwt(token) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
@@ -137,4 +199,4 @@
 
     return JSON.parse(jsonPayload);
   }
-})()
+})();
