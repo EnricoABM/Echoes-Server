@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.n0hana.echoes_server.dto.AcceptTermsRequestDTO;
+import com.n0hana.echoes_server.dto.ReactivateRequestDTO;
 import com.n0hana.echoes_server.dto.TermsResponseDTO;
 import com.n0hana.echoes_server.model.DocumentType;
 import com.n0hana.echoes_server.model.Terms;
@@ -22,6 +23,7 @@ import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.model.UserTermsAcceptance;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.service.TermsService;
+import com.n0hana.echoes_server.service.logs.Auditable;
 
 import lombok.RequiredArgsConstructor;
 
@@ -67,6 +69,29 @@ public class TermsController {
         
         UserTermsAcceptance acceptance = termsService.acceptTerms(user.getId(), dto.type());
         return ResponseEntity.ok(toDTO(acceptance.getTerms()));
+    }
+
+    @PostMapping("/revoke")
+    @Auditable(action = "Revogação de consentimento", entity = "TERMS")
+    public ResponseEntity<Void> revokeConsent(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findUserByEmail(userDetails.getUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        user.setActive(false);
+        userRepository.save(user);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reactivate/request")
+    public ResponseEntity<Void> requestReactivate(@RequestBody AcceptTermsRequestDTO dto) {
+        termsService.requestReactivate(dto.email());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reactivate")
+    public ResponseEntity<Void> reactivate(@RequestBody ReactivateRequestDTO dto) {
+        termsService.reactivate(dto.email(), dto.code(), dto.type());
+        return ResponseEntity.ok().build();
     }
 
     private TermsResponseDTO toDTO(Terms terms) {

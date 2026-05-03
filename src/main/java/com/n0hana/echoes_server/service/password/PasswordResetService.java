@@ -2,6 +2,7 @@ package com.n0hana.echoes_server.service.password;
 
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -47,16 +48,15 @@ public class PasswordResetService {
 
         String code = this.generateRandomCode();
 
-        PasswordCode passwordCode = codeRepository.new PasswordCode();
+        PasswordCode passwordCode = new PasswordCode();
         passwordCode.setEmail(dto.email());
         passwordCode.setCode(code);
-        passwordCode.setExpiredAt(LocalDateTime.now().plusMinutes(15));
+        passwordCode.setExpiredAt(Instant.now().plusSeconds(300));
         passwordCode.setType(CodeType.RESET);
 
         codeRepository.save(passwordCode);
         emailNotifier.send(new TwoFactorDto(
-            user.getEmail(), code, LocalDateTime.now().plusMinutes(15).toInstant(ZoneOffset.of("-03:00")))
-        );
+            user.getEmail(), code, Instant.now().plusSeconds(300)));
     }
 
     @Auditable(action = "Redefinição de Senha", entity = "PASSWORD")
@@ -70,7 +70,7 @@ public class PasswordResetService {
                throw new RuntimeException("Código de Redefinição de Senha Incorreto");
         }
 
-        if (savedCode.getExpiredAt().isBefore(LocalDateTime.now())) {
+        if (savedCode.getExpiredAt().isBefore(Instant.now())) {
             throw new RuntimeException("Código Expirado");
         }
 

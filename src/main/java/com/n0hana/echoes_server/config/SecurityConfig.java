@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/password/forgot").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/password/reset").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/terms/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/terms/**").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
