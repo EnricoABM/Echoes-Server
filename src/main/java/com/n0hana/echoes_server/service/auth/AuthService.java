@@ -15,7 +15,9 @@ import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
+import com.n0hana.echoes_server.repository.TokenRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
+import com.n0hana.echoes_server.repository.UserTermsAcceptanceRepository;
 import com.n0hana.echoes_server.service.logs.Auditable;
 import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
@@ -23,10 +25,12 @@ import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuthService {
     
     private final PasswordEncoder passwordEncoder;
@@ -37,6 +41,8 @@ public class AuthService {
     private final TwoFactorNotifier notifier;
     private final InMemoryTwoFactorRepository twoFactorRepository;
     private final JwtTokenService tokenService;
+    private final TokenRepository tokenRepository;
+    private final UserTermsAcceptanceRepository userTermsAcceptanceRepository;
 
 
     @Auditable(action = "Envio das credenciais para login", entity = "LOGIN")
@@ -157,5 +163,12 @@ public class AuthService {
         cookie.setMaxAge(0);
 
         response.addCookie(cookie);
+    }
+
+    @Auditable(action = "Delete account", entity = "USER")
+    public void deleteAccount(User user) {
+        userTermsAcceptanceRepository.deleteAll(user.getId());
+        tokenRepository.deleteByUser(user);
+        userRepository.delete(user);
     }
 }
