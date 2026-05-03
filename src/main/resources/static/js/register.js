@@ -10,6 +10,8 @@
   const password = document.getElementById("password");
   const confirmPassword = document.getElementById("confirmPassword");
 
+  const acceptTerms = document.getElementById('accept-terms');
+
   /**
    * Verifica se os campos de senha e confirmação são iguais.
    * Caso sejam diferentes, define uma mensagem de erro personalizada.
@@ -51,6 +53,8 @@
   registerForm.addEventListener('submit', async evt => {
     try {
       evt.preventDefault();
+      if (!acceptTerms.checked)
+        return alert('Você deve aceitar os termos');
 
       if (loading)
         return;
