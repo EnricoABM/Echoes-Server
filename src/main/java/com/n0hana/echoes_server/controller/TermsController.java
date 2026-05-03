@@ -2,6 +2,7 @@ package com.n0hana.echoes_server.controller;
 
 import java.util.UUID;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.n0hana.echoes_server.dto.AcceptTermsRequestDTO;
 import com.n0hana.echoes_server.dto.TermsResponseDTO;
@@ -32,7 +34,15 @@ public class TermsController {
     private final UserRepository userRepository;
 
     @GetMapping("/{type}")
-    public ResponseEntity<TermsResponseDTO> getLatestTerms(@PathVariable DocumentType type) {
+    public ResponseEntity<String> getLatestTerms(@PathVariable DocumentType type) {
+        Terms terms = termsService.getActiveTerms(type);
+        return ResponseEntity.ok()
+            .contentType(MediaType.TEXT_HTML)
+            .body(terms.getContent());
+    }
+
+    @GetMapping("/{type}/json")
+    public ResponseEntity<TermsResponseDTO> getLatestTermsJson(@PathVariable DocumentType type) {
         Terms terms = termsService.getActiveTerms(type);
         return ResponseEntity.ok(toDTO(terms));
     }
