@@ -9,11 +9,17 @@ import com.n0hana.echoes_server.dto.PendingRegisterDTO;
 import com.n0hana.echoes_server.dto.RegisterRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
+import com.n0hana.echoes_server.model.DocumentType;
+import com.n0hana.echoes_server.model.Terms;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.model.UserRole;
+import com.n0hana.echoes_server.model.UserTermsAcceptance;
 import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.repository.PendingRegisterRepository;
+import com.n0hana.echoes_server.repository.TermsRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
+import com.n0hana.echoes_server.repository.UserTermsAcceptanceRepository;
+import com.n0hana.echoes_server.service.TermsService;
 import com.n0hana.echoes_server.service.logs.Auditable;
 import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 
@@ -29,6 +35,8 @@ public class RegisterService {
     private final InMemoryTwoFactorRepository twoFactorRepository;
     private final PasswordEncoder passwordEncoder;
     private final PendingRegisterRepository registerRepository;
+    private final TermsRepository termsRepository;
+    private final UserTermsAcceptanceRepository userTermsAcceptanceRepository;
 
     public void registerRequestTeacher(RegisterRequestDTO dto) {
         registerRequest(dto, UserRole.TEACHER);
@@ -108,8 +116,19 @@ public class RegisterService {
     
         userRepository.save(user);
 
+        // Auto-accepts Terms of Use when registering
+        acceptTermsForUser(user);
+
         // Limpa o dados do usuário da memória
         twoFactorRepository.deleteByEmail(dto.email());
         registerRepository.delete(registerDto.email());
+    }
+
+    private void acceptTermsForUser(User user) {
+        var latestTerms = termsRepository.findTopByTypeOrderByTimestampDesc(DocumentType.TERMS_OF_USE);
+        latestTerms.ifPresent(terms -> {
+            UserTermsAcceptance acceptance = new UserTermsAcceptance(user, terms);
+            userTermsAcceptanceRepository.save(acceptance);
+        });
     }
 }
