@@ -1,6 +1,6 @@
 package com.n0hana.echoes_server.service.password;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,17 +14,18 @@ public class InMemoryPasswordCodeRepository {
     private Map<String, PasswordCode> storage = new ConcurrentHashMap<>();
 
     @Data
-    public class PasswordCode
+    public static class PasswordCode
     { 
         private String email;
         private String code;
-        private LocalDateTime expiredAt;
+        private Instant expiredAt;
         private CodeType type;
     }
 
     public enum CodeType {
         CHANGE("change"),
-        RESET("reset");
+        RESET("reset"),
+        REACTIVATE("reactivate");
 
         private String type;
 

@@ -48,6 +48,8 @@ public class User implements UserDetails {
 
     private LocalDateTime lockUntil;
 
+    private boolean active = true;
+
     public User(String name, String email, String password, UserRole role) {
         this.name = name;
         this.email = email;
@@ -86,6 +88,11 @@ public class User implements UserDetails {
     @Override
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return active;
     }
 
 }

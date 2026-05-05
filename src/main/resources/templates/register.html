@@ -47,6 +47,23 @@
             class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"/>
         </div>
 
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Você deve aceitar os termos para continuar</label>
+          <label class="block text-sm text-gray-700">
+            <input
+                type="checkbox"
+                id="accept-terms"
+                required
+                >
+            <span>
+              Aceitar os 
+              <a class="text-primary" href="/api/terms/TERMS_OF_USE" target="_blank">
+                Termos de Uso
+              </a> e
+              <a class="text-primary" href="/api/terms/PRIVACY_POLICY" target="_blank">Política de privacidade</a></span>
+          </label>
+        </div>
+
         <div id="register-loading" class="hidden flex justify-center mt-4">
           <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-primary"></div>
         </div>

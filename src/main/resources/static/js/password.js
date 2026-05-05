@@ -1,7 +1,9 @@
 (function(){
   const validateLoading = document.getElementById('validate-loading');
   const changeLoading = document.getElementById('change-loading');
+  const deletingLoading = document.getElementById('deleting-loading');
   let loading = false;
+  let deleteLoading = false;
 
   /**
    * Atualiza o estado de carregamento da interface.
@@ -17,6 +19,15 @@
     } else {
       validateLoading.classList.add('hidden');
       changeLoading.classList.add('hidden');
+    }
+  }
+
+  function setDeleteLoading(newLoading) {
+    deleteLoading = newLoading;
+    if (deleteLoading) {
+      deletingLoading.remove('hidden');
+    } else {
+      deletingLoading.add('hidden');
     }
   }
 
@@ -101,6 +112,17 @@
     };
   }
 
+  async function deleteAccount() {
+    const res = await fetch('/api/users/me', {
+      method: 'DELETE',
+    })
+
+    return {
+      ok: res.ok,
+      message: res.ok ? '' : 'Um erro ocorreu',
+    }
+  }
+
   /**
    * Evento disparado ao clicar no botão de validação.
    * Verifica a senha atual e libera o formulário de nova senha.
@@ -127,6 +149,30 @@
       setLoading(false);
     }
   });
+
+  document.getElementById('delete-btn').addEventListener('click', async () => {
+    try {
+      if (deleteLoading)
+        return;
+
+      setDeleteLoading(true);
+      const shouldDelete = prompt('Tem certeza que quer deletar sua conta? Digite SIM');
+      if (shouldDelete !== 'SIM')
+        return;
+
+      const res = await deleteAccount();
+      if (res.ok) {
+        window.location.href = '/';
+      } else {
+        alert(res.message);
+      }
+    } catch(err) {
+      console.error(err);
+      alert('Um erro ocorreu');
+    } finally {
+      setDeleteLoading(false);
+    }
+  })
 
   /**
    * Evento disparado ao enviar o formulário de nova senha.
@@ -159,6 +205,8 @@
       window.location.reload();
     }
   });
+
+
 
   /**
    * Inicia um temporizador baseado na expiração do token.

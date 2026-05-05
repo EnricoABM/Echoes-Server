@@ -1,7 +1,9 @@
 package com.n0hana.echoes_server.repository;
 
 import com.n0hana.echoes_server.model.Token;
+import com.n0hana.echoes_server.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -18,5 +20,8 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     List<Token> findAllByUserId(Long userId);
 
     Optional<Token> findByJti(String jti);
+
+    @Modifying
+    void deleteByUser(User user);
 
 }
