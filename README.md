@@ -90,14 +90,34 @@ cd Echoes-Server
 ./mvnw spring-boot:run
 ```
 
-A aplicação executa por padrão em:
+### Docker Compose
+
+O projeto suporta SSL opcional via variáveis de ambiente:
+
 ```bash
-https://localhost:8443
+# Sem SSL (porta 8080)
+USE_SSL=false docker-compose up
+
+# Com SSL (porta 443)
+USE_SSL=true docker-compose up
+
+# Porta customizada com SSL
+USE_SSL=true SERVER_PORT=8443 APP_PORT=8443 docker-compose up
 ```
 
-Caso HTTPS não esteja configurado:
+Variáveis disponíveis:
+| Variável | Padrão | Descrição |
+|----------|--------|-----------|
+| `USE_SSL` | `false` | Habilita HTTPS (true/false) |
+| `SERVER_PORT` | `443` | Porta do servidor dentro do container |
+| `APP_PORT` | `443` | Porta exposta no host |
+
+A aplicação executa na porta 443 por padrão quando `USE_SSL=true`, ou 8080 quando `USE_SSL=false`.
+
+Para usar SSL (`USE_SSL=true`), configure também:
 ```bash
-http://localhost:8080
+SSL_KEYSTORE_PASSWORD=sua_senha
+SSL_ALIAS=alias_do_certificado
 ```
 
 # Endpoints

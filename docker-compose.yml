@@ -31,29 +31,32 @@ services:
       - db
       - redis
     ports:
-      - "443:443" 
+      - "${APP_PORT:-443}:${SERVER_PORT:-443}"
     volumes:
-      - ./certs:/app/certs 
+      - ./certs:/app/certs
       - ./keystore.p12:/app/keystore.p12
     environment:
-      
       # Mysql
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/echoes
       SPRING_DATASOURCE_USERNAME: ${DATABASE_USER}
       SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
-      
-      # Redis 
+
+      # Redis
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
 
-      # HTTPS 
+      # Server
+      SERVER_PORT: ${SERVER_PORT:-443}
+      USE_SSL: ${USE_SSL:-false}
+
+      # SSL
       SERVER_SSL_KEY_STORE: /app/keystore.p12
       SERVER_SSL_KEY_STORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD}
       SERVER_SSL_KEY_ALIAS: ${SSL_ALIAS}
       SERVER_SSL_KEY_STORE_TYPE: ${SSL_KEYSTORE_TYPE}
 
-      # E-mail 
+      # E-mail
       SPRING_MAIL_HOST: ${EMAIL_HOST}
       SPRING_MAIL_PORT: ${EMAIL_PORT}
       SPRING_MAIL_USERNAME: ${EMAIL_USERNAME}
@@ -63,7 +66,7 @@ services:
       API_SMTP_TOKEN: ${API_KEY}
       API_SECURITY_TOKEN_SECRET: ${JWT_SECRET}
       TWOFACTOR_PROVIDER: ${TWO_FACTOR_PROVIDER}
-      
+
       # JPA
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "false"

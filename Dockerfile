@@ -24,7 +24,7 @@ COPY --from=builder /app/target/*.jar app.jar
 ENV SERVER_PORT=443
 
 # Expõe a porta padrão
-EXPOSE 443
+EXPOSE ${SERVER_PORT}
 
 # Comando de execução
 ENTRYPOINT ["java", "-jar", "app.jar"]
