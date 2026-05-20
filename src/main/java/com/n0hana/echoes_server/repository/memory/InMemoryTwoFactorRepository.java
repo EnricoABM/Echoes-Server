@@ -1,5 +1,6 @@
-package com.n0hana.echoes_server.repository;
+package com.n0hana.echoes_server.repository.memory;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
@@ -10,23 +11,26 @@ import org.springframework.stereotype.Repository;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 
 @Repository
-public class InMemoryTwoFactorRepository {
+public class InMemoryTwoFactorRepository implements InMemoryRepository<String, TwoFactorDto> {
 
+    // Armazem
     private final Map<String, TwoFactorDto> storage = new ConcurrentHashMap<>();
 
+    // Salvar os dados
     public TwoFactorDto save(TwoFactorDto token) {
         storage.put(token.email(), token);
         return token;
     }
 
-    public Optional<TwoFactorDto> findByEmail(String email) {
+    // Encontrar Requisição
+    public Optional<TwoFactorDto> find(String email) {
         TwoFactorDto token = storage.get(email);
 
         if (token == null) {
             return Optional.empty();
         }
 
-        // auto-expire logic
+        // Logica de Auto Expiração
         if (token.expiresAt().isBefore(Instant.now())) {
             storage.remove(email);
             return Optional.empty();
@@ -35,11 +39,22 @@ public class InMemoryTwoFactorRepository {
         return Optional.of(token);
     }
 
-    public void deleteByEmail(String email) {
+    // Deletar
+    public void delete(String email) {
         storage.remove(email);
     }
 
-    public boolean existsByEmail(String email) {
+    // Verificar se Existe
+    public boolean exists(String email) {
         return storage.containsKey(email);
     }
+
+    public String buildKey(String email) {
+        return "";
+    }
+
+    @Override
+    public TwoFactorDto save(String email, TwoFactorDto value, Duration tls) {
+        return null;
+    } 
 }

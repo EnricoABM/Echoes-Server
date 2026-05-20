@@ -14,10 +14,10 @@ import com.n0hana.echoes_server.dto.AuthRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
 import com.n0hana.echoes_server.model.User;
-import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.repository.TokenRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.repository.UserTermsAcceptanceRepository;
+import com.n0hana.echoes_server.repository.memory.InMemoryTwoFactorRepository;
 import com.n0hana.echoes_server.service.logs.Auditable;
 import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
@@ -101,7 +101,7 @@ public class AuthService {
 
     @Auditable(action = "Validação do código multi fator", entity = "LOGIN")
     public String login2fa(VerifyDTO dto) {
-        var token = twoFactorRepository.findByEmail(dto.email()).orElseThrow(() ->
+        var token = twoFactorRepository.find(dto.email()).orElseThrow(() ->
             new RuntimeException("Código Inválido")
         );
 
@@ -116,7 +116,7 @@ public class AuthService {
 
         String jwt = tokenService.generateToken(user);
 
-        twoFactorRepository.deleteByEmail(dto.email());
+        twoFactorRepository.delete(dto.email());
 
         return jwt;
     }

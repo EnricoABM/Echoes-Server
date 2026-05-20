@@ -2,6 +2,7 @@ package com.n0hana.echoes_server.service.auth;
 
 import java.time.Instant;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,16 +11,14 @@ import com.n0hana.echoes_server.dto.RegisterRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
 import com.n0hana.echoes_server.model.DocumentType;
-import com.n0hana.echoes_server.model.Terms;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.model.UserRole;
 import com.n0hana.echoes_server.model.UserTermsAcceptance;
-import com.n0hana.echoes_server.repository.InMemoryTwoFactorRepository;
-import com.n0hana.echoes_server.repository.PendingRegisterRepository;
 import com.n0hana.echoes_server.repository.TermsRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
 import com.n0hana.echoes_server.repository.UserTermsAcceptanceRepository;
-import com.n0hana.echoes_server.service.TermsService;
+import com.n0hana.echoes_server.repository.memory.InMemoryTwoFactorRepository;
+import com.n0hana.echoes_server.repository.memory.PendingRegisterRepository;
 import com.n0hana.echoes_server.service.logs.Auditable;
 import com.n0hana.echoes_server.service.notifier.TwoFactorNotifier;
 
@@ -38,34 +37,57 @@ public class RegisterService {
     private final TermsRepository termsRepository;
     private final UserTermsAcceptanceRepository userTermsAcceptanceRepository;
 
-    public void registerRequestTeacher(RegisterRequestDTO dto) {
-        registerRequest(dto, UserRole.TEACHER);
+    @Value("${email.teacher.sufix:@teacher.br}")
+    private String teacherEmailSufix;
+
+    @Value("${email.student.sufix:@student.br}")
+    private String studentEmailSufix;
+
+    @Value("${email.admin.sufix:@admin.br}")
+    private String adminEmailSufix;
+
+    public void pendingRegister(RegisterRequestDTO dto) {     
+        String email = dto.email();
+        
+        if (email.endsWith(teacherEmailSufix)) 
+            registerRequest(dto, UserRole.TEACHER);
+        else if (email.endsWith(studentEmailSufix))
+            registerRequest(dto, UserRole.STUDENT);
+        else 
+            throw new RuntimeException("E-mail ou Senha Inválido");
     }
 
-    public void registerRequestStudent(RegisterRequestDTO dto) {
-        registerRequest(dto, UserRole.STUDENT);
-    }
+    public void pendingRegisterAdmin(RegisterRequestDTO dto) {
+        String email = dto.email();
 
-    public void registerRequestAdmin(RegisterRequestDTO dto) {
-        registerRequest(dto, UserRole.ADMIN);
+        if (email.endsWith(adminEmailSufix)) 
+            registerRequest(dto, UserRole.ADMIN);
+        else 
+            throw new RuntimeException("E-mail ou Senha Inválido");
     }
 
     @Auditable(action = "Envio dos dados para registro", entity = "REGISTER")
     private void registerRequest(RegisterRequestDTO dto, UserRole role) {
-        // Verifica se o usuário já existe
         
+        // Verifica se o usuário já existe
         if (userRepository.findUserByEmail(dto.email()).isPresent())
             throw new RuntimeException("E-mail ou Senha Inválidos");
 
         // Gera código de 2FA
         String code = twoFactorService.generateCode();
+
+        // Geração do Token
         TwoFactorDto token = new TwoFactorDto(
             dto.email(),
             code,
+            // 5 Minutos de Duração
             Instant.now().plusSeconds(300)
         );
         
+        // Encriptação da senha para salvamento da requisição
         String password = passwordEncoder.encode(dto.password());
+
+
         PendingRegisterDTO pendingDTO = new PendingRegisterDTO(
             dto.name(),
             dto.email(),
@@ -74,9 +96,7 @@ public class RegisterService {
         );
 
         // Salva os dados do registro
-        registerRepository.save(
-            pendingDTO
-        );
+        registerRepository.save(pendingDTO);
 
         // Salva os dados do 2FA
         twoFactorRepository.save(token);
@@ -89,7 +109,7 @@ public class RegisterService {
     public void registerMFA(VerifyDTO dto) {
 
         // Verifica se o código existe
-        var tokenExists = twoFactorRepository.findByEmail(dto.email());
+        var tokenExists = twoFactorRepository.find(dto.email());
         if (tokenExists.isEmpty())
             throw new RuntimeException("Código Inválido");
 
@@ -120,7 +140,7 @@ public class RegisterService {
         acceptTermsForUser(user);
 
         // Limpa o dados do usuário da memória
-        twoFactorRepository.deleteByEmail(dto.email());
+        twoFactorRepository.delete(dto.email());
         registerRepository.delete(registerDto.email());
     }
 

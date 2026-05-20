@@ -67,22 +67,10 @@ public class AuthController {
         }
     }
 
-
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequestDTO dto) {
         try {
-            registerService.registerRequestTeacher(dto);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @PostMapping("/register/student")
-    @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<Void> registerStudent(@RequestBody @Valid RegisterRequestDTO dto) {
-        try {
-            registerService.registerRequestStudent(dto);
+            registerService.pendingRegister(dto);
             return ResponseEntity.ok().build();
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().build();
@@ -93,7 +81,7 @@ public class AuthController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> registerAdmin(@RequestBody @Valid RegisterRequestDTO dto) {
         try {
-            registerService.registerRequestStudent(dto);
+            registerService.pendingRegisterAdmin(dto);
             return ResponseEntity.ok().build();
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().build();
