@@ -93,7 +93,7 @@ public class AuthController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> registerAdmin(@RequestBody @Valid RegisterRequestDTO dto) {
         try {
-            registerService.registerRequestStudent(dto);
+            registerService.registerRequestAdmin(dto);
             return ResponseEntity.ok().build();
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().build();
