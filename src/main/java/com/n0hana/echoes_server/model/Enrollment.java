@@ -1,4 +1,4 @@
-package com.n0hana.echoes_server.model
+package com.n0hana.echoes_server.model;
 
 import java.time.Instant;
 import java.util.UUID;
