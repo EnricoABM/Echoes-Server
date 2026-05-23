@@ -15,24 +15,23 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class classroom {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class Classroom {
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @Column(nullable = false)
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    private String description;
+  private String description;
 
-    @Column(nullable = false, unique = true, length = 10)
-    private String code;
+  @Column(nullable = false, unique = true, length = 10)
+  private String code;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns(name = "teacher_id", nullable = false)
-    private User teacher;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "teacher_id", nullable = false)
+  private User teacher;
 
-    @CreationTimestamp
-    private Instant createdAt;
+  @CreationTimestamp
+  private Instant createdAt;
 }
-

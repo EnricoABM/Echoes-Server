@@ -25,7 +25,7 @@ public class ClassroomController {
 
     @PostMapping
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<ClassroomDTO.Response> createClassroom(
+    public ResponseEntity<ClassroomDTO.ClassroomResponse> createClassroom(
             @RequestBody @Valid ClassroomDTO.CreateRequest request,
             @AuthenticationPrincipal User teacher) {
         return ResponseEntity.ok(classroomService.createClassroom(request, teacher));
@@ -33,7 +33,7 @@ public class ClassroomController {
 
     @GetMapping("/teacher")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<List<ClassroomDTO.Response>> getTeacherClassrooms(
+    public ResponseEntity<List<ClassroomDTO.ClassroomResponse>> getTeacherClassrooms(
             @AuthenticationPrincipal User teacher) {
         return ResponseEntity.ok(classroomService.getTeacherClassrooms(teacher));
     }
@@ -51,7 +51,7 @@ public class ClassroomController {
 
     @PostMapping("/enroll")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<ClassroomDTO.Response> enrollStudent(
+    public ResponseEntity<ClassroomDTO.ClassroomResponse> enrollStudent(
             @RequestBody @Valid ClassroomDTO.EnrollRequest request,
             @AuthenticationPrincipal User student) {
         return ResponseEntity.ok(classroomService.enrollStudent(request.code(), student));
@@ -59,7 +59,7 @@ public class ClassroomController {
 
     @GetMapping("/student")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<ClassroomDTO.Response>> getStudentClassrooms(
+    public ResponseEntity<List<ClassroomDTO.ClassroomResponse>> getStudentClassrooms(
             @AuthenticationPrincipal User student) {
         return ResponseEntity.ok(classroomService.getStudentClassrooms(student));
     }
@@ -67,6 +67,7 @@ public class ClassroomController {
     // --- Rotas Compartilhadas (Professor e Aluno matriculado) ---
 
     @GetMapping("/{classroomId}/content")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<List<ClassroomDTO.ContentResponse>> getClassroomContents(
             @PathVariable UUID classroomId,
             @AuthenticationPrincipal User user) {

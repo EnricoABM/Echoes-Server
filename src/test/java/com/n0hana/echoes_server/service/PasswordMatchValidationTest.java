@@ -1,4 +1,4 @@
-package com.n0hana.echoes_server.services;
+package com.n0hana.echoes_server.service;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 

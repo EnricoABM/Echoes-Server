@@ -71,7 +71,7 @@ class ClassroomServiceTest {
         when(classroomRepository.save(any(Classroom.class))).thenReturn(classroom);
 
         // Act
-        ClassroomDTO.Response response = classroomService.createClassroom(request, teacher);
+        ClassroomDTO.ClassroomResponse response = classroomService.createClassroom(request, teacher);
 
         // Assert
         assertNotNull(response);
@@ -91,7 +91,7 @@ class ClassroomServiceTest {
         when(enrollmentRepository.save(any(Enrollment.class))).thenReturn(enrollment);
 
         // Act
-        ClassroomDTO.Response response = classroomService.enrollStudent(classroom.getCode(), student);
+        ClassroomDTO.ClassroomResponse response = classroomService.enrollStudent(classroom.getCode(), student);
 
         // Assert
         assertNotNull(response);

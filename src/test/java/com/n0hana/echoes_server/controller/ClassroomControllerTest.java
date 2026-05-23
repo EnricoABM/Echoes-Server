@@ -11,10 +11,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,11 +35,11 @@ class ClassroomControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @Mock
     private ClassroomService classroomService;
 
     // Precisamos mockar dependências globais de segurança se elas forem carregadas pelo contexto do WebMvcTest
-    @MockBean 
+    @Mock 
     private JwtTokenService jwtTokenService; 
 
     @Test
@@ -47,7 +47,7 @@ class ClassroomControllerTest {
     void createClassroom_ShouldReturn200_WhenUserIsTeacher() throws Exception {
         // Arrange
         ClassroomDTO.CreateRequest request = new ClassroomDTO.CreateRequest("Redes", "Redes de Computadores");
-        ClassroomDTO.Response response = new ClassroomDTO.Response(
+        ClassroomDTO.ClassroomResponse response = new ClassroomDTO.ClassroomResponse(
             UUID.randomUUID(), "Redes", "Redes de Computadores", "XYZ12345", "Prof", Instant.now()
         );
 
@@ -81,7 +81,7 @@ class ClassroomControllerTest {
     void enrollStudent_ShouldReturn200_WhenUserIsStudent() throws Exception {
         // Arrange
         ClassroomDTO.EnrollRequest request = new ClassroomDTO.EnrollRequest("XYZ12345");
-        ClassroomDTO.Response response = new ClassroomDTO.Response(
+        ClassroomDTO.ClassroomResponse response = new ClassroomDTO.ClassroomResponse(
             UUID.randomUUID(), "Redes", "Redes", "XYZ12345", "Prof", Instant.now()
         );
 
