@@ -29,9 +29,26 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-# HTTPS KEYFILE
+# HTTPS KEYFILE e Ficheiros de Ambiente Secretos
 keystore.p12
+.env
 
 ### VS Code ###
 .vscode/
-.env
+
+# Arquivos de ferramentas e scripts locais
+*.zip
+*.tar.gz
+combinado.txt
+
+# Certificados locais e chaves temporárias
+*.crt
+*.csr
+*.key
+*.pem
+
+# Neovim / Vim (Arquivos temporários e de swap)
+*.swp
+*.swo
+*~
+.netrwhist
