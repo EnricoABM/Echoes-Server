@@ -47,6 +47,13 @@
       if (res.status === 429) {
         const retryAfter = res.headers.get('Retry-After');
         message = `Muitas requisições! Tente novamente em ${retryAfter || 'alguns'} segundos.`;
+      } else if (res.status === 400) {
+        const data = await res.json();
+        if (data.message === 'User is disabled') {
+          message = 'Usuário desativado, clique em \'Reative sua conta\'';
+        } else {
+          message = 'Credenciais inválidas';
+        }
       } else {
         message = 'Credenciais inválidas';
       }
