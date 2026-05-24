@@ -99,7 +99,8 @@ public class TermsController {
             terms.getVersion(),
             terms.getContent(),
             terms.getType(),
-            terms.isActive()
+            terms.isActive(),
+            terms.getTimestamp()
         );
     }
 }

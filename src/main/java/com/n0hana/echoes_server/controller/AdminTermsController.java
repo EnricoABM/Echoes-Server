@@ -37,7 +37,8 @@ public class AdminTermsController {
                 terms.getVersion(),
                 terms.getContent(),
                 terms.getType(),
-                terms.isActive()
+                terms.isActive(),
+                terms.getTimestamp()
             ));
         return ResponseEntity.ok(result);
     }
@@ -51,7 +52,8 @@ public class AdminTermsController {
             terms.getVersion(),
             terms.getContent(),
             terms.getType(),
-            terms.isActive()
+            terms.isActive(),
+            terms.getTimestamp()
         ));
     }
 
@@ -64,7 +66,8 @@ public class AdminTermsController {
             terms.getVersion(),
             terms.getContent(),
             terms.getType(),
-            terms.isActive()
+            terms.isActive(),
+            terms.getTimestamp()
         ));
     }
 }
