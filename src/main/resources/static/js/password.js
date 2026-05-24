@@ -133,11 +133,19 @@
     };
   }
 
-  async function deleteAccount() {
-    const res = await fetch('/api/users/me', {
-      method: 'DELETE',
+  async function requestDeleteAccount() {
+    const res = await fetch('/api/users/me/delete-request', {
+      method: 'POST',
     })
+    return res.ok;
+  }
 
+  async function confirmDeleteAccount(code) {
+    const res = await fetch('/api/users/me/delete-confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    })
     return {
       ok: res.ok,
       message: res.ok ? '' : 'Um erro ocorreu',
@@ -205,7 +213,17 @@
       if (shouldDelete !== 'SIM')
         return;
 
-      const res = await deleteAccount();
+      const ok = await requestDeleteAccount();
+      if (!ok) {
+        alert('Um erro ocorreu ao solicitar o código');
+        return;
+      }
+
+      const code = prompt('Um código foi enviado para seu email. Insira o código:');
+      if (!code)
+        return;
+
+      const res = await confirmDeleteAccount(code);
       if (res.ok) {
         window.location.href = '/';
       } else {

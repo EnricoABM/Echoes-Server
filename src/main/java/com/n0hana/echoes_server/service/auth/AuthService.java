@@ -171,4 +171,31 @@ public class AuthService {
         tokenRepository.deleteByUser(user);
         userRepository.delete(user);
     }
+
+    @Auditable(action = "Solicitação de exclusão de conta", entity = "USER")
+    public void requestDeleteAccount(User user) {
+        String code = twoFactorService.generateCode();
+        TwoFactorDto token = new TwoFactorDto(
+            user.getEmail(),
+            code,
+            Instant.now().plusSeconds(300)
+        );
+        twoFactorRepository.save(token);
+        notifier.send(token);
+    }
+
+    @Auditable(action = "Confirmação de exclusão de conta", entity = "USER")
+    public void confirmDeleteAccount(User user, String code) {
+        var token = twoFactorRepository.findByEmail(user.getEmail())
+            .orElseThrow(() -> new RuntimeException("Código Inválido ou Expirado"));
+
+        if (!token.code().equals(code))
+            throw new RuntimeException("Código Inválido");
+
+        twoFactorRepository.deleteByEmail(user.getEmail());
+
+        userTermsAcceptanceRepository.deleteAll(user.getId());
+        tokenRepository.deleteByUser(user);
+        userRepository.delete(user);
+    }
 }
