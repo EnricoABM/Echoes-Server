@@ -37,12 +37,17 @@
     deleteLoading = newLoading;
     if (deleteLoading) {
       deletingLoading.classList.remove('hidden');
+      deleteMfaLoading.classList.remove('hidden');
     } else {
       deletingLoading.classList.add('hidden');
+      deleteMfaLoading.classList.add('hidden');
     }
   }
 
   const newPasswordSection = document.getElementById('newPasswordSection');
+  const deleteSection = document.getElementById('delete-section');
+  const deleteMfaSection = document.getElementById('delete-mfa-section');
+  const deleteMfaLoading = document.getElementById('delete-mfa-loading');
 
   let resetToken = '';
 
@@ -133,11 +138,19 @@
     };
   }
 
-  async function deleteAccount() {
-    const res = await fetch('/api/users/me', {
-      method: 'DELETE',
+  async function requestDeleteAccount() {
+    const res = await fetch('/api/users/me/delete/request', {
+      method: 'POST',
     })
+    return res.ok;
+  }
 
+  async function confirmDeleteAccount(code) {
+    const res = await fetch('/api/users/me/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    })
     return {
       ok: res.ok,
       message: res.ok ? '' : 'Um erro ocorreu',
@@ -205,7 +218,36 @@
       if (shouldDelete !== 'SIM')
         return;
 
-      const res = await deleteAccount();
+      const ok = await requestDeleteAccount();
+      if (!ok) {
+        alert('Um erro ocorreu ao solicitar o código');
+        return;
+      }
+
+      deleteSection.classList.add('hidden');
+      deleteMfaSection.classList.remove('hidden');
+    } catch(err) {
+      console.error(err);
+      alert('Um erro ocorreu');
+    } finally {
+      setDeleteLoading(false);
+    }
+  })
+
+  document.getElementById('delete-confirm-btn').addEventListener('click', async () => {
+    try {
+      if (deleteLoading)
+        return;
+
+      const code = document.getElementById('delete-code').value;
+      if (!code) {
+        alert('Digite o código de verificação');
+        return;
+      }
+
+      setDeleteLoading(true);
+
+      const res = await confirmDeleteAccount(code);
       if (res.ok) {
         window.location.href = '/';
       } else {
