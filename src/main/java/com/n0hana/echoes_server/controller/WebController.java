@@ -26,6 +26,11 @@ public class WebController {
         return "recover";
     }
 
+    @GetMapping("/reactivate")
+    public String reactivate(Model model) {
+        return "reactivate";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(@CookieValue(value = "access_token", required = false) String token) {
 

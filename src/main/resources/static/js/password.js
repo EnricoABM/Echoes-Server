@@ -1,8 +1,10 @@
 (function(){
   const validateLoading = document.getElementById('validate-loading');
   const changeLoading = document.getElementById('change-loading');
+  const disablingLoading = document.getElementById('disabling-loading');
   const deletingLoading = document.getElementById('deleting-loading');
   let loading = false;
+  let disableLoading = false;
   let deleteLoading = false;
 
   /**
@@ -22,12 +24,21 @@
     }
   }
 
+  function setDisableLoading(newLoading) {
+    disableLoading = newLoading;
+    if (disableLoading) {
+      disablingLoading.classList.remove('hidden');
+    } else {
+      disablingLoading.classList.add('hidden');
+    }
+  }
+
   function setDeleteLoading(newLoading) {
     deleteLoading = newLoading;
     if (deleteLoading) {
-      deletingLoading.remove('hidden');
+      deletingLoading.classList.remove('hidden');
     } else {
-      deletingLoading.add('hidden');
+      deletingLoading.classList.add('hidden');
     }
   }
 
@@ -112,6 +123,16 @@
     };
   }
 
+  async function disableAccount() {
+    const res = await fetch('/api/terms/revoke', {
+      method: 'POST',
+    });
+    return {
+      ok: res.ok,
+      message: res.ok ? '' : 'Um erro ocorreu,'
+    };
+  }
+
   async function deleteAccount() {
     const res = await fetch('/api/users/me', {
       method: 'DELETE',
@@ -149,6 +170,30 @@
       setLoading(false);
     }
   });
+
+  document.getElementById('disable-btn').addEventListener('click', async () => {
+    try {
+      if (disableLoading)
+        return;
+
+      setDisableLoading(true);
+      const shouldDisable = prompt('Tem certeza que deseja desativar sua conta? Digite SIM');
+      if (shouldDisable !== 'SIM')
+        return;
+
+      const res = await disableAccount();
+      if (res.ok) {
+        window.location.href = '/';
+      } else {
+        alert(err.message);
+      }
+    } catch(err) {
+      console.error(err);
+      alert('Um erro ocorreu ao desativar a conta');
+    } finally {
+      setDisableLoading(false);
+    }
+  })
 
   document.getElementById('delete-btn').addEventListener('click', async () => {
     try {
