@@ -1,14 +1,16 @@
 package com.n0hana.echoes_server.service;
 
 import java.time.Instant;
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.n0hana.echoes_server.dto.CreateTermsRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.model.DocumentType;
 import com.n0hana.echoes_server.model.Terms;
@@ -109,6 +111,59 @@ public class TermsService {
         user.setActive(true);
         userRepository.save(user);
         codeRepository.delete(email);
+    }
+
+    public Page<Terms> getAllTerms(Pageable pageable) {
+        return termsRepository.findAll(pageable);
+    }
+
+    public Terms getTermById(Long id) {
+        return termsRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Termo não encontrado"));
+    }
+
+    @Transactional
+    public Terms createTerm(CreateTermsRequestDTO dto) {
+        termsRepository.findByTypeAndActiveTrue(dto.type()).ifPresent(active -> {
+            if (!isVersionGreater(dto.version(), active.getVersion())) {
+                throw new RuntimeException(
+                    "Versão deve ser maior que a atual (" + active.getVersion() + ")"
+                );
+            }
+            active.setActive(false);
+            termsRepository.save(active);
+        });
+
+        Terms terms = new Terms();
+        terms.setVersion(dto.version());
+        terms.setContent(dto.content());
+        terms.setType(dto.type());
+        terms.setActive(true);
+        return termsRepository.save(terms);
+    }
+
+    private boolean isVersionGreater(String newVersion, String currentVersion) {
+        int[] newParts = parseVersion(newVersion);
+        int[] currentParts = parseVersion(currentVersion);
+        for (int i = 0; i < 3; i++) {
+            if (newParts[i] > currentParts[i]) return true;
+            if (newParts[i] < currentParts[i]) return false;
+        }
+        return false;
+    }
+
+    private int[] parseVersion(String version) {
+        try {
+            int[] parts = Arrays.stream(version.split("\\."))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+            if (parts.length != 3) {
+                throw new RuntimeException("Formato de versão inválido. Use major.minor.patch (ex: 2.0.0)");
+            }
+            return parts;
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Formato de versão inválido. Use major.minor.patch (ex: 2.0.0)");
+        }
     }
 
     @Transactional
