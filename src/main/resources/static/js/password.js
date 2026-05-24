@@ -37,12 +37,17 @@
     deleteLoading = newLoading;
     if (deleteLoading) {
       deletingLoading.classList.remove('hidden');
+      deleteMfaLoading.classList.remove('hidden');
     } else {
       deletingLoading.classList.add('hidden');
+      deleteMfaLoading.classList.add('hidden');
     }
   }
 
   const newPasswordSection = document.getElementById('newPasswordSection');
+  const deleteSection = document.getElementById('delete-section');
+  const deleteMfaSection = document.getElementById('delete-mfa-section');
+  const deleteMfaLoading = document.getElementById('delete-mfa-loading');
 
   let resetToken = '';
 
@@ -134,14 +139,14 @@
   }
 
   async function requestDeleteAccount() {
-    const res = await fetch('/api/users/me/delete-request', {
+    const res = await fetch('/api/users/me/delete/request', {
       method: 'POST',
     })
     return res.ok;
   }
 
   async function confirmDeleteAccount(code) {
-    const res = await fetch('/api/users/me/delete-confirm', {
+    const res = await fetch('/api/users/me/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code }),
@@ -219,9 +224,28 @@
         return;
       }
 
-      const code = prompt('Um código foi enviado para seu email. Insira o código:');
-      if (!code)
+      deleteSection.classList.add('hidden');
+      deleteMfaSection.classList.remove('hidden');
+    } catch(err) {
+      console.error(err);
+      alert('Um erro ocorreu');
+    } finally {
+      setDeleteLoading(false);
+    }
+  })
+
+  document.getElementById('delete-confirm-btn').addEventListener('click', async () => {
+    try {
+      if (deleteLoading)
         return;
+
+      const code = document.getElementById('delete-code').value;
+      if (!code) {
+        alert('Digite o código de verificação');
+        return;
+      }
+
+      setDeleteLoading(true);
 
       const res = await confirmDeleteAccount(code);
       if (res.ok) {
