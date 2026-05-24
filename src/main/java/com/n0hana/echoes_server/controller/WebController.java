@@ -80,4 +80,13 @@ public class WebController {
 
         return "logs";
     }
+
+    @GetMapping("/dashboard/admin/terms")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String adminTerms(@CookieValue(value = "access_token", required = false) String token) {
+        if (token == null || token.isEmpty()) {
+            return "redirect:/";
+        }
+        return "admin-terms";
+    }
 }
