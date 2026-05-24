@@ -4,11 +4,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +18,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table
+@Immutable
+@Table(name = "audit_log")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -34,7 +37,12 @@ public class AuditLog {
     private String ip;
 
     @CreationTimestamp
-    private Instant timestamp;  
+    private Instant timestamp;
+
+    @PreRemove
+    private void preventDelete() {
+        throw new UnsupportedOperationException("AuditLog entries cannot be deleted");
+    }
     
     public static AuditLogBuilder builder() {
         return new AuditLogBuilder();

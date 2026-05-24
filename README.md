@@ -54,6 +54,37 @@ export SSL_KEYSTORE_PATH=/etc/ssl/echoes/keystore.p12
 export SSL_KEYSTORE_PASSWORD=senha_forte
 ```
 
+### 2.2 Proteção da Tabela de Auditoria (Audit Log)
+
+O sistema possui uma tabela `audit_log` que registra todas as ações importantes dos usuários. Esta tabela é protegida contra alterações e exclusões em dois níveis:
+
+- **Nível de aplicação**: A entidade `AuditLog` possui `@Immutable` e `@PreRemove`, impedindo que o Hibernate gere `UPDATE` ou `DELETE`.
+- **Nível de banco de dados**: Triggers MySQL rejeitam qualquer `UPDATE` ou `DELETE` diretamente no banco.
+
+Para ativar a proteção no banco, execute como **usuário root** no MySQL:
+
+```bash
+docker exec -it echoes_db mysql -u root -p
+```
+
+```sql
+SET GLOBAL log_bin_trust_function_creators = 1;
+USE echoes;
+CREATE TRIGGER audit_log_no_update
+BEFORE UPDATE ON audit_log
+FOR EACH ROW
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'AuditLog entries cannot be modified';
+
+CREATE TRIGGER audit_log_no_delete
+BEFORE DELETE ON audit_log
+FOR EACH ROW
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'AuditLog entries cannot be deleted';
+```
+
+Após criar os triggers, qualquer tentativa de modificar ou excluir registros de auditoria retornará erro.
+
+> **Nota:** O `SET GLOBAL log_bin_trust_function_creators = 1` é necessário apenas uma vez. Sem ele, o MySQL exige privilégio `SUPER` para criar triggers quando o binary logging está ativo.
+
 ### 3. Configuração das demais variáveis
 Além do banco de dados, é necessário configurar:
 
@@ -209,6 +240,7 @@ O sistema implementa:
 * Autenticação multifator (MFA) por e-mail
 * Rate limiting (proteção contra brute force)
 * Suporte a HTTPS
+* Auditoria imutável com triggers de banco de dados
 
 # Observações
 
@@ -222,8 +254,6 @@ O sistema implementa:
 
 * Controle de sessão com refresh token
 * Bloqueio de login por tentativas
-* Auditoria completa
-* Endpoint de logs
 * Integração com dispositivos IoT
 * CRUD de cenários clínicos
 * Testes automatizados
