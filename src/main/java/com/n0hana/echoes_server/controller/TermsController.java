@@ -77,8 +77,7 @@ public class TermsController {
         User user = userRepository.findUserByEmail(userDetails.getUsername())
             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        user.setActive(false);
-        userRepository.save(user);
+        termsService.revoke(user);
         return ResponseEntity.ok().build();
     }
 

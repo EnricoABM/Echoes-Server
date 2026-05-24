@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.model.DocumentType;
@@ -108,6 +109,13 @@ public class TermsService {
         user.setActive(true);
         userRepository.save(user);
         codeRepository.delete(email);
+    }
+
+    @Transactional
+    public void revoke(User user) {
+        userTermsAcceptanceRepository.deleteAll(user.getId());
+        user.setActive(false);
+        userRepository.save(user);
     }
 
     private String generateRandomCode() {
