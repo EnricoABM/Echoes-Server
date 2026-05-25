@@ -19,17 +19,24 @@ import lombok.Setter;
 @Entity
 @Table(name = "tokens")
 public class Token {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
 
-    private String jti;
-    
-    private boolean revoked;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+  private String jti;
 
+  private boolean revoked;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
+
+  public boolean isRevoked() {
+    return revoked;
+  }
+
+  public void setRevoked(boolean revoked) {
+    this.revoked = revoked;
+  }
 }

@@ -29,7 +29,8 @@ public class UserController {
 
         return ResponseEntity.ok(new UserInfoResponseDTO(
             user.getName(),
-            user.getEmail()
+            user.getEmail(),
+            user.getRole().toString()
         ));
     }
     
