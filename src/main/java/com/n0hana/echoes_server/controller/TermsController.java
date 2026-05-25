@@ -89,7 +89,7 @@ public class TermsController {
 
     @PostMapping("/reactivate")
     public ResponseEntity<Void> reactivate(@RequestBody ReactivateRequestDTO dto) {
-        termsService.reactivate(dto.email(), dto.code(), dto.type());
+        termsService.reactivate(dto.email(), dto.code());
         return ResponseEntity.ok().build();
     }
 

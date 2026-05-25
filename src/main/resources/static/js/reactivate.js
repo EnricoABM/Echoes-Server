@@ -66,37 +66,22 @@
    * @returns {Promise<{ok: boolean, message: string}>}
    */
   async function reactivateAccount(email, code) {
-    const types = [
-      'TERMS_OF_USE',
-      'PRIVACY_POLICY',
-      'DATA_DELETION_POLICY',
-      'MARKETING_CONSENT',
-      'COOKIES_POLICY',
-    ];
-    const promises = types.map(type => {
-      return fetch("/api/terms/reactivate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email,
-          code,
-          type,
-        })
-      });
+    const res = await fetch("/api/terms/reactivate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, code })
     });
-    const res = await Promise.all(promises);
-    const ok = res.some(res => res.ok);
 
     let message = '';
 
-    if (ok) {
+    if (!res.ok) {
       message = 'Código inválido ou expirado';
     }
 
     return {
-      ok,
+      ok: res.ok,
       message,
     };
   }
