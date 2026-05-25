@@ -37,13 +37,13 @@ public class RegisterService {
     private final TermsRepository termsRepository;
     private final UserTermsAcceptanceRepository userTermsAcceptanceRepository;
 
-    @Value("${email.teacher.sufix:@teacher.br}")
+    @Value("${email.teacher.sufix:@gmail.com}")
     private String teacherEmailSufix;
 
-    @Value("${email.student.sufix:@student.br}")
+    @Value("${email.student.sufix:@alunos.umc.br}")
     private String studentEmailSufix;
 
-    @Value("${email.admin.sufix:@admin.br}")
+    @Value("${email.admin.sufix:@outlook.com}")
     private String adminEmailSufix;
 
     public void pendingRegister(RegisterRequestDTO dto) {     
