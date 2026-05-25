@@ -101,7 +101,7 @@ public class AuthService {
 
     @Auditable(action = "Validação do código multi fator", entity = "LOGIN")
     public String login2fa(VerifyDTO dto) {
-        var token = twoFactorRepository.find(dto.email()).orElseThrow(() ->
+        var token = twoFactorRepository.findByEmail(dto.email()).orElseThrow(() ->
             new RuntimeException("Código Inválido")
         );
 
@@ -116,7 +116,7 @@ public class AuthService {
 
         String jwt = tokenService.generateToken(user);
 
-        twoFactorRepository.delete(dto.email());
+        twoFactorRepository.deleteByEmail(dto.email());
 
         return jwt;
     }

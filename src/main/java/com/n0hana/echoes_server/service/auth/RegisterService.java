@@ -109,7 +109,7 @@ public class RegisterService {
     public void registerMFA(VerifyDTO dto) {
 
         // Verifica se o código existe
-        var tokenExists = twoFactorRepository.find(dto.email());
+        var tokenExists = twoFactorRepository.findByEmail(dto.email());
         if (tokenExists.isEmpty())
             throw new RuntimeException("Código Inválido");
 
@@ -140,7 +140,7 @@ public class RegisterService {
         acceptTermsForUser(user);
 
         // Limpa o dados do usuário da memória
-        twoFactorRepository.delete(dto.email());
+        twoFactorRepository.deleteByEmail(dto.email());
         registerRepository.delete(registerDto.email());
     }
 
