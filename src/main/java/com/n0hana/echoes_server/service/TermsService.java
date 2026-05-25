@@ -92,7 +92,7 @@ public class TermsService {
         twoFactorNotifier.send(dto);
     }
 
-    public void reactivate(String email, String code, DocumentType type) {
+    public void reactivate(String email, String code) {
         PasswordCode savedCode = codeRepository.getCode(email);
         if (savedCode == null || !savedCode.getCode().equals(code)) {
             throw new RuntimeException("Invalid code");
@@ -106,8 +106,10 @@ public class TermsService {
 
         User user = userRepository.findUserByEmail(email)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        acceptTerms(user.getId(), type);
+
+        for (DocumentType type : DocumentType.values()) {
+            acceptTerms(user.getId(), type);
+        }
         user.setActive(true);
         userRepository.save(user);
         codeRepository.delete(email);
