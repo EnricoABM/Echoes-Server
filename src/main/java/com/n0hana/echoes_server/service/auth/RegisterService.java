@@ -125,10 +125,11 @@ public class RegisterService {
     }
 
     private void acceptTermsForUser(User user) {
-        var latestTerms = termsRepository.findTopByTypeOrderByTimestampDesc(DocumentType.TERMS_OF_USE);
-        latestTerms.ifPresent(terms -> {
-            UserTermsAcceptance acceptance = new UserTermsAcceptance(user, terms);
-            userTermsAcceptanceRepository.save(acceptance);
-        });
+        for (DocumentType type : DocumentType.values()) {
+            termsRepository.findByTypeAndActiveTrue(type).ifPresent(terms -> {
+                UserTermsAcceptance acceptance = new UserTermsAcceptance(user, terms);
+                userTermsAcceptanceRepository.save(acceptance);
+            });
+        }
     }
 }
