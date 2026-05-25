@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.n0hana.echoes_server.model.DocumentType;
-import com.n0hana.echoes_server.model.Terms;
 import com.n0hana.echoes_server.model.UserTermsAcceptance;
 
 @Repository

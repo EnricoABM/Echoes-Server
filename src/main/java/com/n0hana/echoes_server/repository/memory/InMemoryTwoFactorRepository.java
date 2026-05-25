@@ -1,4 +1,4 @@
-package com.n0hana.echoes_server.repository;
+package com.n0hana.echoes_server.repository.memory;
 
 import java.time.Instant;
 import java.util.Map;
