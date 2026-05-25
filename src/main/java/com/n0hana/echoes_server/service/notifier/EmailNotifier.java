@@ -10,13 +10,6 @@ import com.n0hana.echoes_server.dto.TwoFactorDto;
 
 import lombok.RequiredArgsConstructor;
 
-/**==================================
- *  CLASSE DE ENVIO DE NOTIFICÕES
- * ==================================
- * Implementa comunicação com um 
- * cliente de EMAIL para envio das 
- * notificações aos usuários.
-*/
 @Service
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "twofactor.provider", havingValue = "email")

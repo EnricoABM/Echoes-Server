@@ -11,12 +11,6 @@ import com.n0hana.echoes_server.service.logs.Auditable;
 
 import lombok.RequiredArgsConstructor;
 
-/**=======================================
- *  CLASSE DE PROTEÇÃO CONTRA BRUTEFORCE
- * =======================================
- * Implementa lógica de contagem de falhas
- * consecutivas e bloqueio de contas
-*/
 @Service
 @RequiredArgsConstructor
 public class LoginAttemptService {
