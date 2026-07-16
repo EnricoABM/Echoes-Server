@@ -16,15 +16,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.n0hana.echoes_server.dto.ClassroomDTO;
-import com.n0hana.echoes_server.model.Classroom;
-import com.n0hana.echoes_server.model.ClassroomContent;
-import com.n0hana.echoes_server.model.Enrollment;
-import com.n0hana.echoes_server.model.User;
-import com.n0hana.echoes_server.model.UserRole;
-import com.n0hana.echoes_server.repository.ClassroomContentRepository;
-import com.n0hana.echoes_server.repository.ClassroomRepository;
-import com.n0hana.echoes_server.repository.EnrollmentRepository;
+import com.n0hana.echoes_server.classroom.ClassroomDTO;
+import com.n0hana.echoes_server.classroom.ClassroomService;
+import com.n0hana.echoes_server.classroom.model.Classroom;
+import com.n0hana.echoes_server.classroom.model.ClassroomContent;
+import com.n0hana.echoes_server.classroom.model.Enrollment;
+import com.n0hana.echoes_server.classroom.repository.ClassroomContentRepository;
+import com.n0hana.echoes_server.classroom.repository.ClassroomRepository;
+import com.n0hana.echoes_server.classroom.repository.EnrollmentRepository;
+import com.n0hana.echoes_server.user.User;
+import com.n0hana.echoes_server.user.UserRole;
 
 @ExtendWith(MockitoExtension.class)
 class ClassroomServiceTest {

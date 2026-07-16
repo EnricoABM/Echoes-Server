@@ -52,3 +52,7 @@ combinado.txt
 *.swo
 *~
 .netrwhist
+
+# SPECS
+SPEC.md
+templates.md

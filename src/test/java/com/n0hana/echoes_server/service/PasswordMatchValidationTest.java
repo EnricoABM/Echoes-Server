@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.n0hana.echoes_server.controller.AuthController;
+import com.n0hana.echoes_server.auth.AuthController;
 
 @SpringBootTest
 @AutoConfigureMockMvc    

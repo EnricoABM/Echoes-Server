@@ -20,10 +20,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.n0hana.echoes_server.dto.ClassroomDTO;
-import com.n0hana.echoes_server.model.User;
-import com.n0hana.echoes_server.service.ClassroomService;
-import com.n0hana.echoes_server.service.auth.JwtTokenService;
+import com.n0hana.echoes_server.auth.jwt.JwtTokenService;
+import com.n0hana.echoes_server.classroom.ClassroomController;
+import com.n0hana.echoes_server.classroom.ClassroomDTO;
+import com.n0hana.echoes_server.classroom.ClassroomService;
+import com.n0hana.echoes_server.user.User;
 
 @WebMvcTest(ClassroomController.class)
 @AutoConfigureMockMvc(addFilters = false) // Desativa os filtros JWT genéricos para testar focado no @PreAuthorize
