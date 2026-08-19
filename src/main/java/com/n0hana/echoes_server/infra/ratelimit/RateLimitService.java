@@ -1,19 +1,27 @@
 package com.n0hana.echoes_server.infra.ratelimit;
 
 import io.github.bucket4j.*;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 public class RateLimitService {
 
-    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final String PREFIX = "ratelimit:";
 
     public Bucket resolveBucket(String key) {
-        return buckets.computeIfAbsent(key, k -> createBucket());
+      String keyBucket = PREFIX + key;
+      Object cache = redisTemplate.opsForValue().get(keyBucket);
+      if (cache == null) {
+        cache = createBucket();
+      }
+      return (Bucket) cache;
     }
 
     private Bucket createBucket() {

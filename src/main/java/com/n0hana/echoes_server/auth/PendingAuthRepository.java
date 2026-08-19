@@ -1,31 +1,34 @@
 package com.n0hana.echoes_server.auth;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.n0hana.echoes_server.auth.dto.AuthRequestDTO;
+
+import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class PendingAuthRepository {
 
-    private final Cache<String, AuthRequestDTO> cache =
-        Caffeine.newBuilder()
-                .expireAfterWrite(5, TimeUnit.MINUTES)
-                .maximumSize(1000)
-                .build();
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final String PREFIX = "auth:";
 
     public void save(AuthRequestDTO dto) {
-        cache.put(dto.email(), dto);
+      redisTemplate.opsForValue()
+        .set(PREFIX + dto.email(), dto, 5, TimeUnit.MINUTES);
     }
 
     public AuthRequestDTO find(String email) {
-        return cache.getIfPresent(email);
+      String key = PREFIX + email;
+      Object cache = redisTemplate.opsForValue().get(key);
+      return (AuthRequestDTO) cache;
     }
 
     public void delete(String email) {
-        cache.invalidate(email);
+      String key = PREFIX + email;
+      redisTemplate.opsForValue().getAndDelete(key);
     }
 }

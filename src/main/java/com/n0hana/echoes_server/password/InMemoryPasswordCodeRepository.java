@@ -2,16 +2,20 @@ package com.n0hana.echoes_server.password;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @Repository
+@RequiredArgsConstructor
 public class InMemoryPasswordCodeRepository {
 
-    private Map<String, PasswordCode> storage = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final String PREFIX = "passwordcode:";
 
     @Data
     public static class PasswordCode
@@ -39,17 +43,19 @@ public class InMemoryPasswordCodeRepository {
     }
 
     public void save(PasswordCode code) {
-        storage.put(code.getEmail(), code);
+      redisTemplate.opsForValue()
+        .set(PREFIX + code.getEmail(), code, 5, TimeUnit.MINUTES);
     }
 
     public void delete(String email) {
-        storage.remove(email);
+      String key = PREFIX + email;
+      redisTemplate.opsForValue().getAndDelete(key);
     }
 
     public PasswordCode getCode(String email) {
-        return storage.get(email);
-
+      String key = PREFIX + email;
+      Object cache = redisTemplate.opsForValue().get(key);
+      return (PasswordCode) cache;
     }
-
 
 }
