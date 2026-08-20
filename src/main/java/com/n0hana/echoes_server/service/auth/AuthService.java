@@ -3,16 +3,19 @@ package com.n0hana.echoes_server.service.auth;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.n0hana.echoes_server.dto.AuthRequestDTO;
 import com.n0hana.echoes_server.dto.TwoFactorDto;
 import com.n0hana.echoes_server.dto.VerifyDTO;
+import com.n0hana.echoes_server.dto.UserProfileExportDTO;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.repository.TokenRepository;
 import com.n0hana.echoes_server.repository.UserRepository;
@@ -25,9 +28,8 @@ import com.n0hana.echoes_server.service.ratelimit.LoginAttemptService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -43,7 +45,6 @@ public class AuthService {
     private final JwtTokenService tokenService;
     private final TokenRepository tokenRepository;
     private final UserTermsAcceptanceRepository userTermsAcceptanceRepository;
-
 
     @Auditable(action = "Envio das credenciais para login", entity = "LOGIN")
     public void loginRequest(AuthRequestDTO dto) {
@@ -91,8 +92,7 @@ public class AuthService {
             Instant.now().plusSeconds(300)
         );
 
-
-        // Sava o código 2FA
+        // Salva o código 2FA
         twoFactorRepository.save(token);
 
         // Envia Notificação
@@ -105,10 +105,8 @@ public class AuthService {
             new RuntimeException("Código Inválido")
         );
 
-
         if (token.expiresAt().isBefore(Instant.now()) || !token.code().equals(dto.code()))
             throw new RuntimeException("Código Inválido");
-
 
         User user = userRepository.findUserByEmail(dto.email()).orElseThrow(() ->
             new RuntimeException("Código Inválido")
@@ -197,5 +195,20 @@ public class AuthService {
         userTermsAcceptanceRepository.deleteAll(user.getId());
         tokenRepository.deleteByUser(user);
         userRepository.delete(user);
+    }
+
+    @Transactional(readOnly = true)
+    @Auditable(action = "Exportação de dados cadastrais", entity = "USER")
+    public UserProfileExportDTO exportUserData(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("Usuário inválido para exportação de dados.");
+        }
+
+        return new UserProfileExportDTO(
+            user.getName(),
+            user.getEmail(),
+            user.getRole().toString(),
+            LocalDateTime.now()
+        );
     }
 }

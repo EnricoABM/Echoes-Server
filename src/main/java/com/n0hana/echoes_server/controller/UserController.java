@@ -1,5 +1,7 @@
 package com.n0hana.echoes_server.controller;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.n0hana.echoes_server.dto.DeleteAccountConfirmDTO;
 import com.n0hana.echoes_server.dto.UserInfoResponseDTO;
+import com.n0hana.echoes_server.dto.UserProfileExportDTO;
 import com.n0hana.echoes_server.model.User;
 import com.n0hana.echoes_server.service.auth.AuthService;
 
 import lombok.RequiredArgsConstructor;
-
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,6 +34,24 @@ public class UserController {
             user.getEmail(),
             user.getRole().toString()
         ));
+    }
+    
+    @GetMapping("/me/export")
+    public ResponseEntity<UserProfileExportDTO> exportUserProfile() {
+        // Recupera o usuário autenticado com total segurança do contexto do Spring Security
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // Processa o mapeamento e gera o DTO limpo na camada de serviço
+        UserProfileExportDTO exportData = authService.exportUserData(user);
+
+        // Configura os cabeçalhos HTTP para instruir o cliente a realizar o download do arquivo físico
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setContentDispositionFormData("attachment", "echoes_dados_perfil.json");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(exportData);
     }
     
     @PostMapping("/me/delete/request")
@@ -57,5 +77,4 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
-
 }

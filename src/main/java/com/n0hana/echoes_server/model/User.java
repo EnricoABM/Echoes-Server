@@ -4,7 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-
+import java.time.Instant;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table
+@Table(name = "users")
 @Setter
 @Getter
 @AllArgsConstructor
@@ -56,6 +57,12 @@ public class User implements UserDetails {
         this.password = password;
         this.role = role;
     }
+    // Verifique se o atributo de MFA está declarado exatamente assim:
+    private boolean mfaEnabled; 
+
+    // Verifique se o atributo de auditoria de criação está declarado exatamente assim:
+    @CreationTimestamp
+    private Instant createdAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

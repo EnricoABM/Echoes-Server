@@ -11,4 +11,7 @@ import com.n0hana.echoes_server.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findUserByEmail(String email);
+    
+    // Adicione esta linha para resolver o erro do UserService:
+    Optional<User> findByEmail(String email); 
 }
